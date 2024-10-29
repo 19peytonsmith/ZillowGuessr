@@ -1,0 +1,21 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - frontend
+    environment:
+      - FLASK_ENV=development
+
+  frontend:
+    image: node:16
+    working_dir: /app
+    volumes:
+      - ./services/frontend:/app
+    ports:
+      - "3000:3000"
+    command: ["npm", "start"]

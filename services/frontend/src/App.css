@@ -1,0 +1,54 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+  background-color: #16423c;
+  font-family: system-ui, sans-serif;
+  font-weight: normal;
+}
+
+.fixed-size {
+  aspect-ratio: 19 / 6;
+}
+
+.property-carousel {
+  width: 960px;
+  max-width: 100%;
+  height: auto;
+}
+
+#root {
+  height: 100%;
+}
+
+.light-text {
+  color: #e0e0e0;
+}
+
+.fill-black {
+  background-color: black !important;
+}
+
+.small-text {
+  font-size: 0.8rem;
+}
+
+.half-width {
+  width: 50vw;
+}
+
+.MuiSlider-thumb {
+  transition: all 1s ease-in-out;
+}
+
+@media (max-width: 992px) {
+  .half-width {
+    width: 75vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .half-width {
+    width: 90vw;
+  }
+}
