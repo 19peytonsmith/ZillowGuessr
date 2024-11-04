@@ -23,6 +23,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./services/backend/Dockerfile.backend
+          file: Dockerfile.backend
           push: true
           tags: 19peytonsmith/zillowguessr-backend:latest
