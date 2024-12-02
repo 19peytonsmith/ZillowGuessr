@@ -10,7 +10,9 @@ const PropertyCarousel = ({ urls, startIndex }) => {
         // react-photo-view might be useful
         setSelectedImage(urls[index]);
       };
-
+    const items = urls.map((url, index) => (
+        <img key={index} src={url} alt={index} /> 
+    ));
     useEffect(() => {
         setCurIndex(startIndex);
     }, [startIndex]);
@@ -28,11 +30,8 @@ const PropertyCarousel = ({ urls, startIndex }) => {
             isArrowsShadow={false}
             spread={'wide'}
             startIndex={curIndex}
-            onClickCenteredItem={handleClickCenteredItem}>
-                {urls.map((url, index) => (
-                <img key={index} src={url} alt={`image-${index}`} />
-                ))}
-            </Carousel>
+            onClickCenteredItem={handleClickCenteredItem}
+            items={items}/>
         </div>
     );
 };
