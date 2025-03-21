@@ -29,11 +29,13 @@ function App() {
     const [color, setColor] = useState("primary");
     const [getResults, setGetResults] = useState(false);
 
-    const handleOnChange = (event, newValue) => {
+    // Function called whenever Property Slider changes
+    const handlePropertySliderOnChange = (event, newValue) => {
         if (!roundLocked) { 
             setSliderValue(newValue);
         }
     };
+
     // Function to fetch property data from the server
     const fetchPropertyInfo = async (index) => {
         try {
@@ -45,6 +47,7 @@ function App() {
         }
     };
 
+    // Function to update property data in the queue
     useEffect(() => {
         let isMounted = true;
     
@@ -63,8 +66,6 @@ function App() {
             isMounted = false;
         };
     }, []);
-    
-
     const currentData = propertyDataQueue[currentIndex];
 
     // Function to update the color of the slider based on whether the round is locked or not
@@ -82,6 +83,7 @@ function App() {
         return Math.round(1000*(Math.E**(-Math.abs(percentageError))));
     }
 
+    // Helper function to convert home value to slider value (for showing slider difference upon submission)
     const convertValueToSliderValue = (moneyValue) => {
         if (moneyValue <= 100000) {
             return (moneyValue / 100000) * 250; // Scale from 0 to 100,000 to 0 to 250
@@ -89,6 +91,17 @@ function App() {
             return 250 + ((moneyValue - 100000) / (1000000 - 100000)) * (750 - 250); // Scale from 100,000 to 1,000,000 to 250 to 750
         } else {
             return 750 + ((moneyValue - 1000000) / (20000000 - 1000000)) * (1000 - 750); // Scale from 1,000,000 to 20,000,000 to 750 to 1000
+        }
+    }
+
+    // Helper function to convert slider value to money value
+    function calculateValue(value) {
+        if (value <= 250) {
+            return (value / 250) * 100000; // Scale from 0 to 250 to 0 to 100,000
+        } else if (value <= 750) {
+            return 100000 + ((value - 250) / (750 - 250)) * (1000000 - 100000); // Scale from 250 to 500 to 100,000 to 1,000,000
+        } else {
+            return 1000000 + ((value - 750) / (1000 - 750)) * (20000000 - 1000000); // Scale from 500 to 1000 to 1,000,000 to 20,000,000
         }
     }
 
@@ -108,6 +121,7 @@ function App() {
         setColor("warning");
     };
 
+    // Function called whenever the next round button is clicked
     const handleNextRoundClick = () =>{
         setRoundLocked(false);
         setPendingNextRound(false);
@@ -118,6 +132,7 @@ function App() {
         setCarouselIndex(0);
     }
 
+    // Function called whenever one of the round buttons is clicked (to view previous round)
     const handleRoundClick = (round) => {
         if (!roundLocked){
             setOriginalIndex(currentIndex);
@@ -132,11 +147,14 @@ function App() {
         }
     };
 
+    // Function called whenever the Round {number} button is clicked (goes back to original round)
     const handleBackToOriginalRound = () =>{
         setCurrentIndex(originalIndex);
         setRoundLocked(false);
         setSliderValue(250);
     };
+
+    // Function called at the end of the game whenever all rounds are completed
     const handleGetResults = () => {
         const storedScores = Cookies.get('leaderboardScores');
         const leaderboardScores = storedScores ? JSON.parse(storedScores) : [];
@@ -147,16 +165,7 @@ function App() {
                 window.location.href = '/leaderboards'
     }
 
-    function calculateValue(value) {
-        if (value <= 250) {
-            return (value / 250) * 100000; // Scale from 0 to 250 to 0 to 100,000
-        } else if (value <= 750) {
-            return 100000 + ((value - 250) / (750 - 250)) * (1000000 - 100000); // Scale from 250 to 500 to 100,000 to 1,000,000
-        } else {
-            return 1000000 + ((value - 750) / (1000 - 750)) * (20000000 - 1000000); // Scale from 500 to 1000 to 1,000,000 to 20,000,000
-        }
-    }
-
+    // Dynamically change the button based on the state of the game
     const buttonState = () => {
         if (getResults){
             return (
@@ -218,7 +227,7 @@ function App() {
                                     startIndex={carouselIndex}
                                     onChangeIndex={setCarouselIndex}
                                 />
-                                <PropertySlider value={sliderValue} onChange={handleOnChange} disabled={roundLocked} color={color}/>
+                                <PropertySlider value={sliderValue} onChange={handlePropertySliderOnChange} disabled={roundLocked} color={color}/>
                                 <div className="round-div">
                                     <Rounds round={originalIndex + 1} handleClick={handleRoundClick} disabled={pendingNextRound}></Rounds>
                                 </div>
