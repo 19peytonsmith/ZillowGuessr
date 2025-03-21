@@ -68,15 +68,6 @@ function App() {
     }, []);
     const currentData = propertyDataQueue[currentIndex];
 
-    // Function to update the color of the slider based on whether the round is locked or not
-    useEffect(() => {
-        if (roundLocked) {
-          setColor("gray");
-        } else {
-          setColor("primary");
-        }
-    }, [roundLocked]);
-
     // Function used to calculate the score based on your slider value guess
     const calculateScore = (sliderValue, valueOfHome) => {
         const percentageError = (sliderValue - valueOfHome) / (valueOfHome)
@@ -134,6 +125,7 @@ function App() {
 
     // Function called whenever one of the round buttons is clicked (to view previous round)
     const handleRoundClick = (round) => {
+        setColor("gray");
         if (!roundLocked){
             setOriginalIndex(currentIndex);
             setRoundLocked(true);
