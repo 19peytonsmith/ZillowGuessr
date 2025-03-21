@@ -105,7 +105,7 @@ function App() {
         setSliderValue(250);
         setCurrentIndex(prevIndex => prevIndex + 1);
         setOriginalIndex(currentIndex+1);
-        setCarouselIndex(0); // TODO: Reset the PropertyCarousel index to 0 somehow?
+        setCarouselIndex(0);
     }
 
     const handleRoundClick = (round) => {
@@ -206,6 +206,7 @@ function App() {
                                     urls={currentData.urls}
                                     className="property-carousel"
                                     startIndex={carouselIndex}
+                                    onChangeIndex={setCarouselIndex}
                                 />
                                 <PropertySlider value={sliderValue} onChange={handleOnChange} disabled={roundLocked} color={color}/>
                                 <div className="round-div">

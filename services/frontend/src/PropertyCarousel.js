@@ -1,8 +1,9 @@
 // src/PropertyCarousel.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Carousel } from 'react-responsive-3d-carousel';
+import 'react-responsive-3d-carousel/dist/styles.css';
 
-const PropertyCarousel = ({ urls, startIndex }) => {
+const PropertyCarousel = ({ urls, startIndex, onChangeIndex }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [curIndex, setCurIndex] = useState(startIndex)
     const handleClickCenteredItem = (index) => {
@@ -10,12 +11,20 @@ const PropertyCarousel = ({ urls, startIndex }) => {
         // react-photo-view might be useful
         setSelectedImage(urls[index]);
       };
+      
     const items = urls.map((url, index) => (
         <img key={index} src={url} alt={index} /> 
     ));
+
     useEffect(() => {
         setCurIndex(startIndex);
     }, [startIndex]);
+
+    const onChange = useCallback((index) => {
+        setCurIndex(index);
+        if (onChangeIndex) onChangeIndex(index);
+    }, [onChangeIndex]);
+
     return (
         <div>
             <Carousel
@@ -30,6 +39,7 @@ const PropertyCarousel = ({ urls, startIndex }) => {
             isArrowsShadow={false}
             spread={'wide'}
             startIndex={curIndex}
+            onChange={onChange} 
             onClickCenteredItem={handleClickCenteredItem}
             items={items}/>
         </div>
