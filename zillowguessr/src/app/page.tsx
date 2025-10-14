@@ -11,7 +11,7 @@ import Rounds from "@/components/Rounds";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 
-const ROUNDS = 1;
+const ROUNDS = 5;
 
 type PropertyInfo = {
   urls: string[];
