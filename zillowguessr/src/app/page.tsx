@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import type { SliderProps } from "@mui/material/Slider";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import PropertySlider from "@/components/PropertySlider";
@@ -37,20 +38,11 @@ export default function HomePage() {
     []
   );
 
-  const [scores, setScores] = useState<number[]>([]);
+  const [, setScores] = useState<number[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [roundLocked, setRoundLocked] = useState<boolean>(false);
   const [pendingNextRound, setPendingNextRound] = useState<boolean>(false);
-  const [color, setColor] = useState<
-    | "primary"
-    | "warning"
-    | "secondary"
-    | "success"
-    | "error"
-    | "info"
-    | "inherit"
-    | "string"
-  >("primary");
+  const [color, setColor] = useState<SliderProps["color"] | string>("primary");
   const [getResults, setGetResults] = useState<boolean>(false);
 
   const currentData = useMemo(
@@ -146,7 +138,11 @@ export default function HomePage() {
     setSliderValue([numericSlider, convertValueToSliderValue(valueOfHome)]);
 
     setRoundLocked(true);
-    currentIndex < ROUNDS - 1 ? setPendingNextRound(true) : setGetResults(true);
+    if (currentIndex < ROUNDS - 1) {
+      setPendingNextRound(true);
+    } else {
+      setGetResults(true);
+    }
     setColor("warning");
   };
 
@@ -161,7 +157,7 @@ export default function HomePage() {
   };
 
   const handleRoundClick = (round: number) => {
-    setColor("gray" as any);
+    setColor("secondary");
     if (!roundLocked) {
       setOriginalIndex(currentIndex);
       setRoundLocked(true);
@@ -265,7 +261,7 @@ export default function HomePage() {
               value={sliderValue}
               onChange={handlePropertySliderOnChange}
               disabled={roundLocked}
-              color={color as any}
+              color={color as SliderProps["color"]}
             />
 
             <div className="round-div">
