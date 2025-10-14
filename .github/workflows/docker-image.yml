@@ -17,6 +17,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
+          # Uses token instead of password for better security
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build and push web image (from Dockerfile.dev)
