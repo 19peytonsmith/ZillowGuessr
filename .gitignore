@@ -17,12 +17,25 @@
 /.next/
 /out/
 
+# Ignore Next build output in subfolders (e.g. zillowguessr/.next)
+**/.next/
+
+# Ignore node_modules anywhere (root and subfolders)
+**/node_modules/
+
+# Ignore local env files in any folder
+.env*
+
 # production
 /build
 
 # misc
 .DS_Store
 *.pem
+
+# IDE/editor
+.vscode/
+.idea/
 
 # debug
 npm-debug.log*
@@ -39,3 +52,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Docker
+.dockerignore
+
+# GitHub Actions artifact cache / workflow temp
+.github/workflows/*.log
