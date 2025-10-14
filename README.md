@@ -4,9 +4,9 @@ ZillowGuessr is a small Next.js web app that turns browsing Zillow listings into
 
 This README covers how to run the project in development using Docker Compose (recommended) or locally with Node.
 
-## Production demo (placeholder)
+## Production demo
 
-A placeholder production site is available at: COMING_SOON
+Play it at: [https://zillowguessr.vercel.app/](https://zillowguessr.vercel.app/) (custom domain coming soon!)
 
 ## Quick overview
 
