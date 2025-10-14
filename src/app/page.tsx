@@ -1,103 +1,287 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import PropertySlider from "@/components/PropertySlider";
+import PropertyCarousel from "@/components/PropertyCarousel";
+import SubmitButton from "@/components/SubmitButton";
+import Rounds from "@/components/Rounds";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
+
+const ROUNDS = 1;
+
+type PropertyInfo = {
+  urls: string[];
+  value: number;
+  beds: number | string;
+  baths: number | string;
+  square_footage: string;
+  address: string;
+  city_state_zipcode: string;
+};
+
+export default function HomePage() {
+  const router = useRouter();
+
+  const [propertyDataQueue, setPropertyDataQueue] = useState<PropertyInfo[]>(
+    []
+  );
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [originalIndex, setOriginalIndex] = useState<number>(0);
+  const [carouselIndex, setCarouselIndex] = useState<number>(0);
+
+  const [sliderValue, setSliderValue] = useState<number | number[]>(250);
+  const [sliderValues, setSliderValues] = useState<Array<number | undefined>>(
+    []
+  );
+
+  const [scores, setScores] = useState<number[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [roundLocked, setRoundLocked] = useState<boolean>(false);
+  const [pendingNextRound, setPendingNextRound] = useState<boolean>(false);
+  const [color, setColor] = useState<
+    | "primary"
+    | "warning"
+    | "secondary"
+    | "success"
+    | "error"
+    | "info"
+    | "inherit"
+    | "string"
+  >("primary");
+  const [getResults, setGetResults] = useState<boolean>(false);
+
+  const currentData = useMemo(
+    () => propertyDataQueue[currentIndex],
+    [propertyDataQueue, currentIndex]
+  );
+
+  const handlePropertySliderOnChange: React.ComponentProps<
+    typeof PropertySlider
+  >["onChange"] = (_e, newVal) => {
+    if (!roundLocked) {
+      setSliderValue(newVal as number | number[]);
+    }
+  };
+
+  const fetchPropertyInfo = async (
+    index: number
+  ): Promise<PropertyInfo | null> => {
+    try {
+      const res = await fetch(`/api/property_info?page=${index}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as PropertyInfo;
+      return data;
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      for (let i = 0; i < ROUNDS; i++) {
+        const data = await fetchPropertyInfo(i);
+        if (data && isMounted) setPropertyDataQueue((prev) => [...prev, data]);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const calculateScore = (guessMoney: number, valueOfHome: number) => {
+    const percentageError = (guessMoney - valueOfHome) / valueOfHome;
+    return Math.round(1000 * Math.E ** -Math.abs(percentageError));
+  };
+
+  const convertValueToSliderValue = (moneyValue: number) => {
+    if (moneyValue <= 100_000) {
+      return (moneyValue / 100_000) * 250;
+    } else if (moneyValue <= 1_000_000) {
+      return (
+        250 + ((moneyValue - 100_000) / (1_000_000 - 100_000)) * (750 - 250)
+      );
+    } else {
+      return (
+        750 +
+        ((moneyValue - 1_000_000) / (20_000_000 - 1_000_000)) * (1000 - 750)
+      );
+    }
+  };
+
+  function calculateValue(v: number) {
+    if (v <= 250) {
+      return (v / 250) * 100_000;
+    } else if (v <= 750) {
+      return 100_000 + ((v - 250) / (750 - 250)) * (1_000_000 - 100_000);
+    } else {
+      return 1_000_000 + ((v - 750) / (1000 - 750)) * (20_000_000 - 1_000_000);
+    }
+  }
+
+  const handleSubmit = (valueOfHome: number) => {
+    const numericSlider = Array.isArray(sliderValue)
+      ? sliderValue[0]
+      : sliderValue;
+    const scoreForRound = calculateScore(
+      calculateValue(numericSlider),
+      valueOfHome
+    );
+
+    setSliderValues((prev) => {
+      const updated = [...prev];
+      updated[currentIndex] = numericSlider;
+      return updated;
+    });
+
+    setScores((prev) => [...prev, scoreForRound]);
+    setTotal((prev) => prev + scoreForRound);
+
+    setSliderValue([numericSlider, convertValueToSliderValue(valueOfHome)]);
+
+    setRoundLocked(true);
+    currentIndex < ROUNDS - 1 ? setPendingNextRound(true) : setGetResults(true);
+    setColor("warning");
+  };
+
+  const handleNextRoundClick = () => {
+    setRoundLocked(false);
+    setPendingNextRound(false);
+    setColor("primary");
+    setSliderValue(250);
+    setCurrentIndex((i) => i + 1);
+    setOriginalIndex(currentIndex + 1);
+    setCarouselIndex(0);
+  };
+
+  const handleRoundClick = (round: number) => {
+    setColor("gray" as any);
+    if (!roundLocked) {
+      setOriginalIndex(currentIndex);
+      setRoundLocked(true);
+    }
+    setCurrentIndex(round - 1);
+    const sv = sliderValues[round - 1];
+    setSliderValue(typeof sv === "number" ? sv : 250);
+  };
+
+  const handleBackToOriginalRound = () => {
+    setCurrentIndex(originalIndex);
+    setRoundLocked(false);
+    setSliderValue(250);
+  };
+
+  const handleGetResults = () => {
+    const stored = Cookies.get("leaderboardScores");
+    const existing: number[] = stored ? JSON.parse(stored) : [];
+    const updated = [...existing, total];
+    Cookies.set("leaderboardScores", JSON.stringify(updated), { expires: 7 });
+
+    router.push("/leaderboards");
+  };
+
+  const buttonState = () => {
+    if (getResults) {
+      return (
+        <button className="btn btn-success" onClick={handleGetResults}>
+          Get Results
+        </button>
+      );
+    } else if (pendingNextRound) {
+      return (
+        <button className="btn btn-primary" onClick={handleNextRoundClick}>
+          Next Round
+        </button>
+      );
+    } else if (roundLocked) {
+      return (
+        <button
+          className="btn btn-secondary"
+          onClick={handleBackToOriginalRound}
+        >
+          Round {originalIndex + 1}
+        </button>
+      );
+    } else {
+      return (
+        <SubmitButton
+          onClick={() => currentData && handleSubmit(currentData.value)}
+        >
+          Go!
+        </SubmitButton>
+      );
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="mx-auto my-auto d-flex h-100">
+      {currentData ? (
+        <div className="d-flex gap-2 mx-auto" id="container">
+          <div
+            className="half-width p-lg-4 p-2"
+            style={{ backgroundColor: "whitesmoke" }}
+          >
+            <h2 className="my-0">{currentData.address}</h2>
+            <div className="d-flex justify-content-between">
+              <h4>{currentData.city_state_zipcode}</h4>
+              <div className="property-data d-flex gap-2">
+                <h5>
+                  <FontAwesomeIcon icon={faBed} /> {currentData.beds}
+                  <span className="small-text">bd</span>
+                </h5>
+                <h5>
+                  <FontAwesomeIcon icon={faBathtub} /> {currentData.baths}
+                  <span className="small-text">ba</span>
+                </h5>
+                <h5>
+                  <FontAwesomeIcon icon={faRuler} />{" "}
+                  {currentData.square_footage}
+                  <span className="small-text">
+                    ft<sup>2</sup>
+                  </span>
+                </h5>
+              </div>
+            </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <hr />
+            <h5>
+              Score: <span className="text-success">{total}</span>
+            </h5>
+            <hr />
+
+            <PropertyCarousel
+              urls={currentData.urls}
+              startIndex={carouselIndex}
+              onChangeIndex={setCarouselIndex}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+            <PropertySlider
+              value={sliderValue}
+              onChange={handlePropertySliderOnChange}
+              disabled={roundLocked}
+              color={color as any}
+            />
+
+            <div className="round-div">
+              <Rounds
+                round={originalIndex + 1}
+                handleClick={handleRoundClick}
+                disabled={pendingNextRound}
+              />
+            </div>
+
+            <div className="submit-btn text-center my-3">{buttonState()}</div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }

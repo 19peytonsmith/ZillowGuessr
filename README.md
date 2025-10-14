@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ZillowGuessr
 
-## Getting Started
+ZillowGuessr is a small Next.js web app that turns browsing Zillow listings into a guessing game: players try to guess listing prices and compete on leaderboards. It's built with Next.js (React), Material UI, Bootstrap, and some lightweight components for property carousels and sliders. The repository contains the web frontend and a minimal API route used by the app.
 
-First, run the development server:
+This README covers how to run the project in development using Docker Compose (recommended) or locally with Node.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Production demo (placeholder)
+
+A placeholder production site is available at: COMING_SOON
+
+## Quick overview
+
+- Framework: Next.js (app router)
+- Language: TypeScript + React
+- Dev server: port 3000
+- Scripts available: `dev`, `build`, `start`, `lint` (see `package.json`)
+
+## Prerequisites
+
+- Docker & Docker Compose (for the Docker workflow)
+- or Node.js (v18+ recommended) and npm if you prefer to run locally
+
+## Run with Docker Compose (recommended for development)
+
+1. From the repository root (the folder that contains `docker-compose.yml`) run in PowerShell:
+
+```powershell
+docker-compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. To stop and remove containers:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```powershell
+docker-compose down
+```
 
-## Learn More
+Notes:
 
-To learn more about Next.js, take a look at the following resources:
+- The compose file mounts the `zillowguessr/` subfolder into the container so the container sees the app's `package.json`. If you edited compose or Dockerfile, make sure the service's `volumes` points at `./zillowguessr/:/app`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Run locally without Docker
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Change into the app folder and install dependencies:
 
-## Deploy on Vercel
+```powershell
+cd .\zillowguessr
+npm ci
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Start the dev server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```powershell
+npm run dev
+```
+
+3. Build for production and start:
+
+```powershell
+npm run build
+npm start
+```
+
+## Useful scripts
+
+- npm run dev — start Next.js in development (turbopack)
+- npm run build — build for production
+- npm start — run the production server
+- npm run lint — run eslint
+
+## Troubleshooting
+
+- ENOENT for `/app/package.json` during `docker-compose up`: this usually means the container's `/app` was overwritten by a bind mount that doesn't contain `package.json`. Ensure `docker-compose.yml` has the service volume set to `./zillowguessr/:/app` (not `./:/app`).
+- If you see file-watching problems on Windows, enable polling: the compose file already sets `WATCHPACK_POLLING=true` in development.
+
+## Contributing
+
+Contributions are welcome. Open an issue or submit a pull request for fixes and features.

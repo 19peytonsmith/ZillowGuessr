@@ -1,0 +1,18 @@
+"use client";
+
+import React from "react";
+import Button from "@mui/material/Button";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+interface SubmitButtonProps {
+  onClick?: () => void;
+  children: React.ReactNode;
+}
+
+export default function SubmitButton({ onClick, children }: SubmitButtonProps) {
+  return (
+    <Button className="px-5" variant="contained" onClick={onClick}>
+      {children}
+    </Button>
+  );
+}
