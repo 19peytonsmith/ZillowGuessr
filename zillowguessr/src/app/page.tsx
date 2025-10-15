@@ -253,9 +253,8 @@ export default function HomePage() {
 
             <PropertyCarousel
               urls={currentData.urls}
-              startIndex={carouselIndex}
+              resetKey={`${currentIndex}-${currentData.urls[0] ?? ""}`}
               onChangeIndex={setCarouselIndex}
-              providerKey={currentIndex}
             />
 
             <PropertySlider
