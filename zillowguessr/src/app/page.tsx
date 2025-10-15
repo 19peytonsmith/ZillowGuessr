@@ -32,7 +32,7 @@ export default function HomePage() {
   );
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [originalIndex, setOriginalIndex] = useState<number>(0);
-  const [carouselIndex, setCarouselIndex] = useState<number>(0);
+  const [, setCarouselIndex] = useState<number>(0);
 
   const [sliderValue, setSliderValue] = useState<number | number[]>(250);
   const [sliderValues, setSliderValues] = useState<Array<number | undefined>>(
@@ -72,13 +72,14 @@ export default function HomePage() {
     maxAttempts = 20,
     delayMs = 300
   ): Promise<PropertyInfo | null> => {
-    const isValid = (data: any): data is PropertyInfo => {
+    const isValid = (data: unknown): data is PropertyInfo => {
+      const d = data as Partial<PropertyInfo> | null | undefined;
       return (
-        data &&
-        typeof data.value === "number" &&
-        Array.isArray(data.urls) &&
-        data.urls.length > 2 &&
-        typeof data.address === "string"
+        !!d &&
+        typeof d.value === "number" &&
+        Array.isArray(d.urls) &&
+        d.urls.length > 2 &&
+        typeof d.address === "string"
       );
     };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Carousel, Status } from "react-responsive-3d-carousel";
 import "react-responsive-3d-carousel/dist/styles.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
@@ -23,9 +24,11 @@ export default function PropertyCarousel({
     () =>
       urls.map((url, idx) => (
         <PhotoView key={idx} src={url}>
-          <img
+          <Image
             src={url}
             alt={`Property image ${idx + 1}`}
+            width={800}
+            height={300}
             style={{
               width: "100%",
               height: "300px",
