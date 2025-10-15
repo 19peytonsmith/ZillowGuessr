@@ -7,17 +7,13 @@ import "react-responsive-3d-carousel/dist/styles.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
-type Props = {
-  urls: string[];
-  resetKey: string | number;
-  onChangeIndex?: (index: number) => void;
-};
-
 export default function PropertyCarousel({
   urls,
-  resetKey,
   onChangeIndex,
-}: Props) {
+}: {
+  urls: string[];
+  onChangeIndex?: (i: number) => void;
+}) {
   const [curIndex, setCurIndex] = React.useState(0);
 
   const items = React.useMemo(
@@ -51,9 +47,8 @@ export default function PropertyCarousel({
   );
 
   return (
-    <PhotoProvider key={`provider-${resetKey}`}>
+    <PhotoProvider>
       <Carousel
-        key={`carousel-${resetKey}`}
         items={items}
         startIndex={0}
         height="auto"

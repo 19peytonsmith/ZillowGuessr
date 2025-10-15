@@ -319,8 +319,8 @@ export default function HomePage() {
             <hr />
 
             <PropertyCarousel
+              key={`round-${currentIndex}`}
               urls={currentData.urls}
-              resetKey={`${currentIndex}-${currentData.urls[0] ?? ""}`}
               onChangeIndex={setCarouselIndex}
             />
 
