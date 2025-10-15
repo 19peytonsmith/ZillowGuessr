@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import Slider, { SliderProps } from "@mui/material/Slider";
+import PriceIndicators from "./PriceIndicators";
 
 type PropertySliderProps = {
   value: number | number[];
@@ -39,18 +40,32 @@ export default function PropertySlider({
   color = "primary",
   disabled = false,
 }: PropertySliderProps) {
+  const isRange = Array.isArray(value);
+  const topOffset = isRange ? 10 : 0;
+
   return (
-    <Slider
-      color={color}
-      aria-label="Property price"
-      valueLabelDisplay="auto"
-      marks={marks}
-      min={0}
-      max={1000}
-      valueLabelFormat={prettyValue}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-    />
+    <div style={{ position: "relative", paddingTop: isRange ? 36 : 0 }}>
+      {isRange && (
+        <PriceIndicators
+          value={value as [number, number]}
+          prettyValue={prettyValue}
+          chosenColor="#1976d2"
+          actualColor="#28a745"
+          top={topOffset}
+        />
+      )}
+      <Slider
+        color={color}
+        aria-label="Property price"
+        valueLabelDisplay="auto"
+        marks={marks}
+        min={0}
+        max={1000}
+        valueLabelFormat={prettyValue}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    </div>
   );
 }

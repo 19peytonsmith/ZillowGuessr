@@ -54,19 +54,19 @@ export default function PropertyCarousel({
         items={items}
         startIndex={0}
         height="auto"
-        containerHeight="400px"
+        containerHeight="300px"
         autoPlay={false}
         showIndicators={false}
         showStatus={false}
         showArrows
-        transformDuration={100}
+        transformDuration={300}
         onChange={handleChange}
       >
         <div
           style={{
             position: "absolute",
-            top: "10px",
-            right: "10px",
+            top: "0px",
+            right: "0px",
             zIndex: 10,
           }}
         >

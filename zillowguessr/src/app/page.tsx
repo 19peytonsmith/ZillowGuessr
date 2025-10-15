@@ -8,10 +8,11 @@ import PropertySlider from "@/components/PropertySlider";
 import PropertyCarousel from "@/components/PropertyCarousel";
 import SubmitButton from "@/components/SubmitButton";
 import Rounds from "@/components/Rounds";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 
-const ROUNDS = 2;
+const ROUNDS = 5;
 
 type PropertyInfo = {
   urls: string[];
@@ -37,6 +38,9 @@ export default function HomePage() {
   const [sliderValues, setSliderValues] = useState<Array<number | undefined>>(
     []
   );
+  const [sliderResults, setSliderResults] = useState<
+    Array<number[] | undefined>
+  >([]);
 
   const [, setScores] = useState<number[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -58,28 +62,76 @@ export default function HomePage() {
     }
   };
 
+  /**
+   * Fetch property info with retries. This will call the API repeatedly until
+   * a valid PropertyInfo is returned or attempts are exhausted. This prevents
+   * a bad listing from being mounted and exposed to the user.
+   */
   const fetchPropertyInfo = async (
-    index: number
+    index: number,
+    maxAttempts = 20,
+    delayMs = 300
   ): Promise<PropertyInfo | null> => {
-    try {
-      const res = await fetch(`/api/property_info?page=${index}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as PropertyInfo;
-      return data;
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      return null;
+    const isValid = (data: any): data is PropertyInfo => {
+      return (
+        data &&
+        typeof data.value === "number" &&
+        Array.isArray(data.urls) &&
+        data.urls.length > 2 &&
+        typeof data.address === "string"
+      );
+    };
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        // add attempt/seed params to help the server avoid caching and for debugging
+        const res = await fetch(
+          `/api/property_info?page=${index}&attempt=${attempt}`,
+          { cache: "no-store" }
+        );
+
+        if (!res.ok) {
+          // server returned an HTTP error. Try again.
+          console.warn(
+            `property_info fetch not ok (status=${res.status}), attempt=${attempt}`
+          );
+        } else {
+          const body = await res.json();
+          if (isValid(body)) {
+            return body;
+          }
+          // Not valid — maybe returned an error payload or malformed HTML — keep retrying.
+          console.warn("property_info returned invalid data, retrying", body);
+        }
+      } catch (err) {
+        console.warn("Error fetching property_info, retrying", err);
+      }
+
+      // delay before next attempt to avoid tight loop
+      await new Promise((r) => setTimeout(r, delayMs));
     }
+
+    console.error(
+      `Failed to fetch a valid property after ${maxAttempts} attempts (seed=${index}).`
+    );
+    return null;
   };
 
   useEffect(() => {
     let isMounted = true;
     (async () => {
       for (let i = 0; i < ROUNDS; i++) {
-        const data = await fetchPropertyInfo(i);
-        if (data && isMounted) setPropertyDataQueue((prev) => [...prev, data]);
+        // For each round, keep trying (with retries inside fetchPropertyInfo) until we
+        // either get a valid listing or we exhaust the attempts. This prevents a bad
+        // listing from being mounted and prevents showing API errors to the user.
+        const data = await fetchPropertyInfo(i, 20, 300);
+        if (data && isMounted) {
+          setPropertyDataQueue((prev) => [...prev, data]);
+        } else {
+          // If we failed to get a valid property after retries, log and continue.
+          // The UI will remain in the loading state until enough items are available.
+          console.error(`Could not load property for round ${i}`);
+        }
       }
     })();
     return () => {
@@ -132,6 +184,15 @@ export default function HomePage() {
       return updated;
     });
 
+    setSliderResults((prev) => {
+      const updated = [...prev];
+      updated[currentIndex] = [
+        numericSlider,
+        convertValueToSliderValue(valueOfHome),
+      ];
+      return updated;
+    });
+
     setScores((prev) => [...prev, scoreForRound]);
     setTotal((prev) => prev + scoreForRound);
 
@@ -163,8 +224,13 @@ export default function HomePage() {
       setRoundLocked(true);
     }
     setCurrentIndex(round - 1);
-    const sv = sliderValues[round - 1];
-    setSliderValue(typeof sv === "number" ? sv : 250);
+    const result = sliderResults[round - 1];
+    if (result) {
+      setSliderValue(result);
+    } else {
+      const sv = sliderValues[round - 1];
+      setSliderValue(typeof sv === "number" ? sv : 250);
+    }
   };
 
   const handleBackToOriginalRound = () => {
@@ -268,7 +334,7 @@ export default function HomePage() {
               <Rounds
                 round={originalIndex + 1}
                 handleClick={handleRoundClick}
-                disabled={pendingNextRound}
+                disabled={pendingNextRound || getResults}
                 totalRounds={ROUNDS}
                 onCurrentClick={
                   currentIndex !== originalIndex
@@ -282,7 +348,7 @@ export default function HomePage() {
           </div>
         </div>
       ) : (
-        <p>Loading...</p>
+        <LoadingSkeleton />
       )}
     </div>
   );
