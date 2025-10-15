@@ -62,7 +62,7 @@ export default function PropertyCarousel({
         showIndicators={false}
         showStatus={false}
         showArrows
-        transformDuration={300}
+        transformDuration={1000}
         onChange={handleChange}
       >
         <div
