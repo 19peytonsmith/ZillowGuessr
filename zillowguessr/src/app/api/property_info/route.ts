@@ -79,6 +79,9 @@ function parsePropertyInfo(html: string): PropertyInfo | null {
   const imgPattern = /(https?:\/\/[^,\s]+_960\.jpg)/g;
   const urls = Array.from(new Set(Array.from(html.matchAll(imgPattern), (m) => m[1])));
 
+  // If there aren't at least 3 images, the result is unlikely to be meaningful for the game.
+  if (urls.length <= 2) return null;
+
   const first = (re: RegExp, s: string, group = 1): string | null => {
     const m = re.exec(s);
     return m ? m[group] : null;
