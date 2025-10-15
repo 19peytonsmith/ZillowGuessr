@@ -67,7 +67,7 @@ export default function PropertyCarousel({
         showArrows
         startIndex={curIndex}
         onChange={onChange}
-        transformDuration={300}
+        transformDuration={100}
         items={items}
       />
     </PhotoProvider>

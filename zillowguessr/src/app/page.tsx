@@ -11,7 +11,7 @@ import Rounds from "@/components/Rounds";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 
-const ROUNDS = 5;
+const ROUNDS = 2;
 
 type PropertyInfo = {
   urls: string[];
@@ -201,7 +201,7 @@ export default function HomePage() {
           className="btn btn-secondary"
           onClick={handleBackToOriginalRound}
         >
-          Round {originalIndex + 1}
+          Go back to Round {originalIndex + 1}
         </button>
       );
     } else {
@@ -271,6 +271,11 @@ export default function HomePage() {
                 handleClick={handleRoundClick}
                 disabled={pendingNextRound}
                 totalRounds={ROUNDS}
+                onCurrentClick={
+                  currentIndex !== originalIndex
+                    ? handleBackToOriginalRound
+                    : undefined
+                }
               />
             </div>
 

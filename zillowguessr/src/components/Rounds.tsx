@@ -9,6 +9,7 @@ interface RoundsProps {
   handleClick: (round: number) => void;
   disabled?: boolean;
   totalRounds?: number;
+  onCurrentClick?: () => void;
 }
 
 export default function Rounds({
@@ -16,6 +17,7 @@ export default function Rounds({
   handleClick,
   disabled = false,
   totalRounds = 5,
+  onCurrentClick,
 }: RoundsProps) {
   const circles = Array.from({ length: totalRounds }, (_, i) => i + 1);
 
@@ -38,8 +40,18 @@ export default function Rounds({
           );
         } else if (index === round - 1) {
           // Current round → green filled circle
+          const clickable = !!onCurrentClick && !disabled;
           return (
-            <i key={index} className={`bi bi-${round}-circle text-success`}></i>
+            <i
+              key={index}
+              className={`bi bi-${round}-circle text-success`}
+              onClick={clickable ? onCurrentClick : undefined}
+              style={{
+                cursor: clickable ? "pointer" : "default",
+                opacity: disabled ? 0.5 : 1,
+              }}
+              title={clickable ? `Return to round ${round}` : undefined}
+            ></i>
           );
         } else {
           // Future rounds → blue outlined circles
