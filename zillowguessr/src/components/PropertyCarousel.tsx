@@ -13,12 +13,16 @@ type PropertyCarouselProps = {
   urls: string[];
   startIndex: number;
   onChangeIndex?: (index: number) => void;
+  // optional key to force remounting the PhotoProvider/Carousel when the
+  // parent wants the viewer reset (e.g. switching rounds)
+  providerKey?: string | number;
 };
 
 export default function PropertyCarousel({
   urls,
   startIndex,
   onChangeIndex,
+  providerKey,
 }: PropertyCarouselProps) {
   const [curIndex, setCurIndex] = React.useState<number>(startIndex);
 
@@ -54,8 +58,9 @@ export default function PropertyCarousel({
   );
 
   return (
-    <PhotoProvider>
+    <PhotoProvider key={providerKey ?? undefined}>
       <Carousel
+        key={providerKey ?? undefined}
         autoPlay={false}
         showIndicators={false}
         showStatus={true}

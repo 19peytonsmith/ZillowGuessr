@@ -255,6 +255,7 @@ export default function HomePage() {
               urls={currentData.urls}
               startIndex={carouselIndex}
               onChangeIndex={setCarouselIndex}
+              providerKey={currentIndex}
             />
 
             <PropertySlider
@@ -269,6 +270,7 @@ export default function HomePage() {
                 round={originalIndex + 1}
                 handleClick={handleRoundClick}
                 disabled={pendingNextRound}
+                totalRounds={ROUNDS}
               />
             </div>
 

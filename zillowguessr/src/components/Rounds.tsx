@@ -8,14 +8,16 @@ interface RoundsProps {
   round: number;
   handleClick: (round: number) => void;
   disabled?: boolean;
+  totalRounds?: number;
 }
 
 export default function Rounds({
   round,
   handleClick,
   disabled = false,
+  totalRounds = 5,
 }: RoundsProps) {
-  const circles = [1, 2, 3, 4, 5];
+  const circles = Array.from({ length: totalRounds }, (_, i) => i + 1);
 
   return (
     <h5 className="d-flex gap-2 justify-content-center">
