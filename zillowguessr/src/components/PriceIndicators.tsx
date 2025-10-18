@@ -22,7 +22,7 @@ export default function PriceIndicators({
 
   // If the two indicators are very close in slider units (0-1000), consider
   // them overlapping and render the guessed indicator below the slider.
-  const OVERLAP_THRESHOLD = 150; // units out of 1000 (~15%)
+  const OVERLAP_THRESHOLD = 200; // units out of 1000 (~20%)
   const isOverlapping = Math.abs(value[0] - value[1]) <= OVERLAP_THRESHOLD;
 
   return (
