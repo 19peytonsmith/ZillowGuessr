@@ -12,7 +12,7 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 
-const ROUNDS = 5;
+const ROUNDS = 2;
 
 type PropertyInfo = {
   urls: string[];

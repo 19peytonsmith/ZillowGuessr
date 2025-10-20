@@ -25,10 +25,22 @@ export default function PriceIndicators({
   const OVERLAP_THRESHOLD = 200; // units out of 1000 (~20%)
   const isOverlapping = Math.abs(value[0] - value[1]) <= OVERLAP_THRESHOLD;
 
+  // Trigger animation when the value changes (i.e., after a guess is made)
+  const [animateKey, setAnimateKey] = React.useState(0);
+
+  const guessed = value[0];
+  const actual = value[1];
+
+  React.useEffect(() => {
+    // bump key to retrigger CSS animation when value changes
+    setAnimateKey((k) => k + 1);
+  }, [guessed, actual]);
+
   return (
     <>
       <div
         aria-hidden
+        className={`price-indicator-container ${animateKey}`}
         style={{
           position: "absolute",
           // if overlapping, move guessed indicator below the slider by adding vertical offset
@@ -43,6 +55,8 @@ export default function PriceIndicators({
         }}
       >
         <div
+          className="price-indicator-label price-indicator-animate"
+          // use inline styles for color/border to keep them configurable from props
           style={{
             background: "white",
             border: `1px solid ${chosenColor}`,
@@ -73,6 +87,7 @@ export default function PriceIndicators({
         }}
       >
         <div
+          className="price-indicator-label price-indicator-animate"
           style={{
             background: "white",
             border: `1px solid ${actualColor}`,
