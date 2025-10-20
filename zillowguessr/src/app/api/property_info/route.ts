@@ -28,6 +28,8 @@ type PropertyInfo = {
   square_footage: string;
   address: string;
   city_state_zipcode: string;
+  // detailUrl points to the Zillow property detail page (external)
+  detailUrl?: string;
 };
 
 async function readCities(): Promise<string[]> {
@@ -225,6 +227,10 @@ export async function GET() {
         { status: 502 }
       );
     }
+
+    // Attach the detailUrl we resolved earlier so the frontend can link directly
+    // back to the Zillow detail page for this listing.
+    info.detailUrl = detailUrl;
 
     return NextResponse.json(info, { status: 200 });
   } catch {

@@ -22,6 +22,7 @@ type PropertyInfo = {
   square_footage: string;
   address: string;
   city_state_zipcode: string;
+  detailUrl?: string;
 };
 
 export default function HomePage() {
@@ -313,9 +314,30 @@ export default function HomePage() {
             </div>
 
             <hr />
-            <h5>
-              Score: <span className="text-success">{total}</span>
-            </h5>
+            <div className="d-flex align-items-center justify-content-between">
+              <h5>
+                Score: <span className="text-success">{total}</span>
+              </h5>
+              {/* Show Zillow link button if the round has been guessed (roundLocked) and we have a detailUrl */}
+              {roundLocked && currentData.detailUrl ? (
+                <a
+                  className="btn btn-outline-success ms-3 icon-link icon-link-hover"
+                  href={currentData.detailUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  View on Zillow
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="bi"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                  >
+                    <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
+                  </svg>
+                </a>
+              ) : null}
+            </div>
             <hr />
 
             <PropertyCarousel
