@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { SliderProps } from "@mui/material/Slider";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
@@ -12,7 +12,7 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 
-const ROUNDS = 1;
+const ROUNDS = 3;
 
 type PropertyInfo = {
   urls: string[];
@@ -48,6 +48,83 @@ export default function HomePage() {
 
   const [, setScores] = useState<number[]>([]);
   const [total, setTotal] = useState<number>(0);
+  // displayTotal is what we show in the UI and will animate between values
+  const [displayTotal, setDisplayTotal] = useState<number>(0);
+  const [showDelta, setShowDelta] = useState<boolean>(false);
+  const [lastDelta, setLastDelta] = useState<number>(0);
+  const [animatingScore, setAnimatingScore] = useState<boolean>(false);
+  const animRef = useRef<number | null>(null);
+
+  type ConfettiPiece = {
+    id: number;
+    left: number; // percent offset inside container
+    color: string;
+    delay: number; // ms
+    rotate: number;
+  };
+
+  const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+
+  const spawnConfetti = (count = 20) => {
+    const colors = ["#ffd166", "#06d6a0", "#118ab2", "#ef476f", "#ffd700"];
+    const pieces: ConfettiPiece[] = Array.from({ length: count }).map(
+      (_, i) => ({
+        id: Date.now() + i,
+        left: Math.random() * 100,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        delay: Math.random() * 200,
+        rotate: Math.floor(Math.random() * 360),
+      })
+    );
+    setConfettiPieces(pieces);
+
+    // clear after animation finishes (duration + max delay + buffer)
+    window.setTimeout(() => setConfettiPieces([]), 1400);
+  };
+
+  // ease helper for nicer numeric animation
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+  const startAnimateDisplay = (from: number, to: number) => {
+    // cancel any existing
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+
+    const duration = 700; // ms
+    const start = performance.now();
+    setAnimatingScore(true);
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = easeOutCubic(t);
+      const value = Math.round(from + (to - from) * eased);
+      setDisplayTotal(value);
+      if (t < 1) {
+        animRef.current = requestAnimationFrame(step);
+      } else {
+        animRef.current = null;
+        setAnimatingScore(false);
+      }
+    };
+
+    animRef.current = requestAnimationFrame(step);
+  };
+
+  // Keep displayTotal in sync when total changes but we are not animating
+  useEffect(() => {
+    if (!animatingScore) {
+      setDisplayTotal(total);
+    }
+  }, [total, animatingScore]);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, []);
   const [roundLocked, setRoundLocked] = useState<boolean>(false);
   const [pendingNextRound, setPendingNextRound] = useState<boolean>(false);
   const [color, setColor] = useState<SliderProps["color"] | string>("primary");
@@ -204,7 +281,29 @@ export default function HomePage() {
     });
 
     setScores((prev) => [...prev, scoreForRound]);
-    setTotal((prev) => prev + scoreForRound);
+
+    // Animate: show a +N delta, then increment the displayed score up to the new total
+    const prevTotal = total;
+    const newTotal = prevTotal + scoreForRound;
+
+    // store the authoritative total immediately so other logic sees it
+    setTotal(newTotal);
+
+    // show delta +N
+    setLastDelta(scoreForRound);
+    setShowDelta(true);
+
+    // spawn confetti for very large single-round scores
+    if (scoreForRound > 950) {
+      spawnConfetti(26);
+    }
+
+    // hide delta after 600ms then start increment animation
+    window.setTimeout(() => {
+      setShowDelta(false);
+      // start numeric increment animation
+      startAnimateDisplay(prevTotal, newTotal);
+    }, 600);
 
     setSliderValue([numericSlider, convertValueToSliderValue(valueOfHome)]);
 
@@ -325,7 +424,35 @@ export default function HomePage() {
             <div className="d-flex align-items-center justify-content-between">
               <h5>
                 Score:{" "}
-                <span style={{ color: "var(--price-actual)" }}>{total}</span>
+                <span className="score-inline">
+                  <span
+                    className={`score-number ${animatingScore ? "anim" : ""}`}
+                    style={{ color: "var(--price-actual)" }}
+                  >
+                    {displayTotal}
+                  </span>
+                  {showDelta ? (
+                    <span className={`score-delta show`}>+{lastDelta}</span>
+                  ) : null}
+
+                  {/* Confetti overlay (renders briefly when spawned) */}
+                  {confettiPieces.length > 0 ? (
+                    <div className="confetti-container" aria-hidden>
+                      {confettiPieces.map((p) => (
+                        <span
+                          key={p.id}
+                          className="confetti-piece"
+                          style={{
+                            left: `${p.left}%`,
+                            background: p.color,
+                            transform: `rotate(${p.rotate}deg)`,
+                            animationDelay: `${p.delay}ms`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </span>
               </h5>
 
               <div className="d-flex align-items-center gap-2">
