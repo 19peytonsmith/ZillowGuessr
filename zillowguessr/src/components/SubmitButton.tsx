@@ -12,7 +12,7 @@ interface SubmitButtonProps {
 export default function SubmitButton({ onClick, children }: SubmitButtonProps) {
   return (
     <Button className="px-5" variant="contained" onClick={onClick}>
-      {children}
+      <span className="btn-text">{children}</span>
     </Button>
   );
 }

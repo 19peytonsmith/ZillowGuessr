@@ -7,7 +7,7 @@ export default function LoadingSkeleton() {
     <div className="d-flex gap-2 mx-auto" id="container">
       <div
         className="half-width p-lg-4 p-2"
-        style={{ backgroundColor: "whitesmoke" }}
+        style={{ backgroundColor: "var(--card-bg)" }}
       >
         <div className="skeleton skeleton-title" />
 

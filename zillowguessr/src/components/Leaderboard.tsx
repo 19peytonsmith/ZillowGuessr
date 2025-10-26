@@ -29,8 +29,11 @@ export default function Leaderboard() {
           <h2>Your Total Scores</h2>
           <ul>
             {leaderboardScores.map((score, index) => (
-              <li key={index}>
-                Game {index + 1}: {score}
+              <li style={{ color: "var(--text)" }} key={index}>
+                <span>Game {index + 1}:</span>{" "}
+                <span style={{ color: "var(--price-actual)", fontWeight: 600 }}>
+                  {score}
+                </span>
               </li>
             ))}
           </ul>
@@ -56,7 +59,7 @@ const styles: {
   },
   scoreCard: {
     padding: "20px",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "var(--leaderboard-bg)",
     borderRadius: "10px",
     textAlign: "center",
     boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
