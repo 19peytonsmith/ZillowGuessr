@@ -402,15 +402,15 @@ export default function HomePage() {
           <div className="d-flex justify-content-between">
             <h4>{currentData.city_state_zipcode}</h4>
             <div className="property-data d-flex gap-2">
-              <h5>
+              <h5 className="text-end">
                 <FontAwesomeIcon icon={faBed} /> {currentData.beds}
                 <span className="small-text">bd</span>
               </h5>
-              <h5>
+              <h5 className="text-end">
                 <FontAwesomeIcon icon={faBathtub} /> {currentData.baths}
                 <span className="small-text">ba</span>
               </h5>
-              <h5>
+              <h5 className="text-end">
                 <FontAwesomeIcon icon={faRuler} /> {currentData.square_footage}
                 <span className="small-text">
                   ft<sup>2</sup>
@@ -422,7 +422,7 @@ export default function HomePage() {
           <hr />
           <div className="d-flex align-items-center justify-content-between">
             <h5>
-              Score:{" "}
+              Score{" "}
               <span className="score-inline">
                 <span
                   className={`score-number ${animatingScore ? "anim" : ""}`}

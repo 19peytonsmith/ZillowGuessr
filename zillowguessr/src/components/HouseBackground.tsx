@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   svgSrc?: string;
@@ -13,6 +13,7 @@ type Props = {
   zIndex?: number | string;
   tintLight?: string;
   tintDark?: string;
+  minViewport?: number;
 };
 
 type Sprite = {
@@ -35,11 +36,23 @@ export default function HouseBackground({
   zIndex = 0,
   tintLight = "rgba(0,0,0,0.5)",
   tintDark = "rgba(255,255,255,0.5)",
+  minViewport = 1000,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia(`(min-width: ${minViewport}px)`);
+    const apply = () => setEnabled(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, [minViewport]);
+
+  useEffect(() => {
+    if (!enabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -63,17 +76,14 @@ export default function HouseBackground({
 
     const rnd = (a: number, b: number) => Math.random() * (b - a) + a;
 
-    const resize = (
-      c: HTMLCanvasElement,
-      context: CanvasRenderingContext2D
-    ) => {
+    const resize = () => {
       w = window.innerWidth;
       h = window.innerHeight;
-      c.style.width = w + "px";
-      c.style.height = h + "px";
-      c.width = Math.floor(w * dpr);
-      c.height = Math.floor(h * dpr);
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     const spawnSprite = (fromEdge?: "left" | "right"): Sprite => {
@@ -107,35 +117,33 @@ export default function HouseBackground({
       if (prefersReduced) sprites.forEach((s) => (s.x = rnd(0, w)));
     };
 
-    const clear = (context: CanvasRenderingContext2D) => {
-      context.clearRect(0, 0, w, h);
+    const clear = () => {
+      ctx.clearRect(0, 0, w, h);
     };
 
-    const drawSprite = (context: CanvasRenderingContext2D, s: Sprite) => {
+    const drawSprite = (s: Sprite) => {
       if (!img.complete) return;
-      context.globalAlpha = s.opacity;
-      context.drawImage(img, s.x, s.y, s.size, s.size);
-      context.globalAlpha = 1;
+      ctx.globalAlpha = s.opacity;
+      ctx.drawImage(img, s.x, s.y, s.size, s.size);
+      ctx.globalAlpha = 1;
     };
 
-    const tintPass = (context: CanvasRenderingContext2D) => {
-      context.save();
-      context.globalCompositeOperation = "source-atop";
-      context.fillStyle = tint;
-      context.fillRect(0, 0, w, h);
-      context.restore();
+    const tintPass = () => {
+      ctx.save();
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = tint;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
     };
 
     const step = (ts: number) => {
       if (!running) return;
       const dt = Math.min(0.05, (ts - last) / 1000);
       last = ts;
-
-      clear(ctx);
-
+      clear();
       for (let i = 0; i < sprites.length; i++) {
         const s = sprites[i];
-        drawSprite(ctx, s);
+        drawSprite(s);
         if (!prefersReduced) {
           s.x += s.dir * s.speed * dt;
           if (s.dir === 1 && s.x - s.size > w) sprites[i] = spawnSprite("left");
@@ -143,8 +151,7 @@ export default function HouseBackground({
             sprites[i] = spawnSprite("right");
         }
       }
-
-      tintPass(ctx);
+      tintPass();
       rafRef.current = requestAnimationFrame(step);
     };
 
@@ -160,9 +167,10 @@ export default function HouseBackground({
       }
     };
 
-    resize(canvas, ctx);
+    resize();
     seed();
-    window.addEventListener("resize", () => resize(canvas, ctx));
+
+    window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", onVisibility);
 
     img.decode?.().finally(() => {
@@ -173,10 +181,11 @@ export default function HouseBackground({
     return () => {
       running = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", () => resize(canvas, ctx));
+      window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [
+    enabled,
     svgSrc,
     count,
     minSize,
@@ -187,6 +196,8 @@ export default function HouseBackground({
     tintLight,
     tintDark,
   ]);
+
+  if (!enabled) return null;
 
   return (
     <canvas

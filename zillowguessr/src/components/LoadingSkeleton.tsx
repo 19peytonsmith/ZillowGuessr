@@ -20,8 +20,10 @@ export default function LoadingSkeleton() {
       </div>
 
       <hr />
-
-      <div className="skeleton skeleton-score" />
+      <div className="d-flex justify-content-between align-items-center">
+        <div className="skeleton skeleton-score" />
+        <div className="skeleton skeleton-show-map" />
+      </div>
 
       <hr />
 

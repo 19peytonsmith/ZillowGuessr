@@ -3,7 +3,6 @@ import { Lexend_Exa } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/app.css";
 import "../styles/skeleton.css";
-import ThemeToggle from "../components/ThemeToggle";
 import HouseBackground from "@/components/HouseBackground";
 
 const lexendExa = Lexend_Exa({
