@@ -423,7 +423,7 @@ export default function HomePage() {
           <div className="d-flex align-items-center justify-content-between">
             <h5>
               Score{" "}
-              <span className="score-inline">
+              <span className="score-inline d-block d-sm-inline">
                 <span
                   className={`score-number ${animatingScore ? "anim" : ""}`}
                   style={{ color: "var(--price-actual)" }}
@@ -438,7 +438,7 @@ export default function HomePage() {
               </span>
             </h5>
 
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 flex-column flex-sm-row">
               {/* Always-present button to toggle the embedded Google Map for this address */}
               {currentData.address ? (
                 <button

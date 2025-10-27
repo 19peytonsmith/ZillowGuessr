@@ -4,29 +4,40 @@ import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof document === "undefined") return "light";
+    const attr = document.documentElement.getAttribute("data-theme");
+    return attr === "dark" || attr === "light" ? attr : "light";
+  });
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const saved = localStorage.getItem("theme");
-      const initial =
-        saved === "light" || saved === "dark"
-          ? saved
-          : window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-      setTheme(initial);
-      document.documentElement.setAttribute("data-theme", initial);
-      localStorage.setItem("theme", initial);
-    } catch {}
+
+    // Cross-tab sync
+    const onStorage = (e: StorageEvent) => {
+      if (
+        e.key === "theme" &&
+        (e.newValue === "dark" || e.newValue === "light")
+      ) {
+        setTheme(e.newValue);
+        document.documentElement.setAttribute("data-theme", e.newValue);
+        document.cookie = `theme=${e.newValue};path=/;max-age=31536000`;
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   useEffect(() => {
+    // Persist whenever theme changes (user toggled or storage sync)
     try {
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("theme", theme);
+      document.cookie = `theme=${theme};path=/;max-age=31536000`;
     } catch {}
   }, [theme]);
 
@@ -36,6 +47,8 @@ export default function ThemeToggle() {
 
   return (
     <button
+      role="switch"
+      aria-checked={theme === "dark"}
       aria-label={
         theme === "light" ? "Switch to dark theme" : "Switch to light theme"
       }

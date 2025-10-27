@@ -54,20 +54,7 @@ export default function PriceIndicators({
           zIndex: 10,
         }}
       >
-        <div
-          className="price-indicator-label price-indicator-animate"
-          // use inline styles for color/border to keep them configurable from props
-          style={{
-            background: "var(--card-bg)",
-            border: `1px solid ${chosenColor}`,
-            color: chosenColor,
-            padding: "2px 6px",
-            borderRadius: 6,
-            fontSize: 12,
-            fontWeight: 600,
-            boxShadow: "0 1px 3px var(--shadow)",
-          }}
-        >
+        <div className="price-indicator-label price-indicator-animate">
           Your guess: {prettyValue(value[0])}
         </div>
       </div>
@@ -86,19 +73,7 @@ export default function PriceIndicators({
           zIndex: 10,
         }}
       >
-        <div
-          className="price-indicator-label price-indicator-animate"
-          style={{
-            background: "var(--card-bg)",
-            border: `1px solid ${actualColor}`,
-            color: actualColor,
-            padding: "2px 6px",
-            borderRadius: 6,
-            fontSize: 12,
-            fontWeight: 600,
-            boxShadow: "0 1px 3px var(--shadow)",
-          }}
-        >
+        <div className="price-indicator-label price-indicator-animate actual">
           Actual: {prettyValue(value[1])}
         </div>
       </div>
