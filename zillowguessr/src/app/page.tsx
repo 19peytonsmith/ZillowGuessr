@@ -54,6 +54,11 @@ export default function HomePage() {
   const [lastDelta, setLastDelta] = useState<number>(0);
   const [animatingScore, setAnimatingScore] = useState<boolean>(false);
   const animRef = useRef<number | null>(null);
+  // When true, prevent displayTotal from immediately jumping to `total`
+  // This is used to keep the UI showing the previous total while we show
+  // the +N delta and then animate the numeric increment.
+  const [holdDisplayUntilAnimation, setHoldDisplayUntilAnimation] =
+    useState<boolean>(false);
 
   type ConfettiPiece = {
     id: number;
@@ -92,6 +97,10 @@ export default function HomePage() {
       animRef.current = null;
     }
 
+    // We're about to begin the numeric animation — clear the hold so the
+    // sync effect can operate normally after the animation finishes.
+    setHoldDisplayUntilAnimation(false);
+
     const duration = 700; // ms
     const start = performance.now();
     setAnimatingScore(true);
@@ -114,10 +123,13 @@ export default function HomePage() {
 
   // Keep displayTotal in sync when total changes but we are not animating
   useEffect(() => {
-    if (!animatingScore) {
+    // Only update the displayed total when we're not animating and when
+    // there isn't an explicit hold requested (we hold while showing the
+    // +N delta so the displayed number doesn't jump prematurely).
+    if (!animatingScore && !holdDisplayUntilAnimation) {
       setDisplayTotal(total);
     }
-  }, [total, animatingScore]);
+  }, [total, animatingScore, holdDisplayUntilAnimation]);
 
   // cleanup on unmount
   useEffect(() => {
@@ -286,6 +298,10 @@ export default function HomePage() {
     const prevTotal = total;
     const newTotal = prevTotal + scoreForRound;
 
+    // Prevent the UI from immediately jumping to the new total while we
+    // show the +N delta. The numeric animation will clear this hold when it
+    // starts.
+    setHoldDisplayUntilAnimation(true);
     // store the authoritative total immediately so other logic sees it
     setTotal(newTotal);
 
