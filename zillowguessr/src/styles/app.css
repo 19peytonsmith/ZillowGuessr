@@ -195,6 +195,7 @@ h6 {
 }
 .MuiSlider-root .MuiSlider-markLabel {
   color: var(--slider-mark-label) !important;
+  font-family: var(--font-lexend-exa);
 }
 .MuiSlider-root .MuiSlider-rail {
   background-color: var(--slider-rail) !important;

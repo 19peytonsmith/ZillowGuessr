@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const ROUNDS = 3;
+const ROUNDS = 5;
 
 type PropertyInfo = {
   urls: string[];
