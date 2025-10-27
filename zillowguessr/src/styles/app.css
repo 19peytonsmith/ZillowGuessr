@@ -58,44 +58,6 @@ html {
   align-self: self-end;
 }
 
-/* Confetti styles */
-.confetti-container {
-  position: absolute;
-  left: 50%;
-  top: -56px; /* start higher so pieces burst above the score */
-  transform: translateX(-50%);
-  width: 160px; /* tighter spread centered on the score */
-  height: 120px;
-  pointer-events: none;
-  overflow: visible;
-}
-.confetti-piece {
-  position: absolute;
-  top: 0; /* start at top of container */
-  width: 8px;
-  height: 12px;
-  border-radius: 2px;
-  opacity: 0;
-  transform-origin: center;
-  will-change: transform, opacity;
-  /* animate upward (negative translateY) and keep final state (fill-mode both) */
-  animation: confetti-rise 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-@keyframes confetti-rise {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    /* smaller rise so confetti doesn't go too far up */
-    transform: translateY(-48px) rotate(420deg) scale(0.9);
-  }
-}
-
 /* Theme variables: default to light theme. Toggle by setting
    `data-theme="dark"` on the <html> element. */
 :root {

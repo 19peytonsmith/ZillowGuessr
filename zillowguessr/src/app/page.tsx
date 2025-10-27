@@ -8,6 +8,7 @@ import PropertySlider from "@/components/PropertySlider";
 import PropertyCarousel from "@/components/PropertyCarousel";
 import SubmitButton from "@/components/SubmitButton";
 import Rounds from "@/components/Rounds";
+import Confetti from "@/components/Confetti";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
@@ -52,6 +53,7 @@ export default function HomePage() {
   const [displayTotal, setDisplayTotal] = useState<number>(0);
   const [showDelta, setShowDelta] = useState<boolean>(false);
   const [lastDelta, setLastDelta] = useState<number>(0);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [animatingScore, setAnimatingScore] = useState<boolean>(false);
   const animRef = useRef<number | null>(null);
   // When true, prevent displayTotal from immediately jumping to `total`
@@ -59,33 +61,6 @@ export default function HomePage() {
   // the +N delta and then animate the numeric increment.
   const [holdDisplayUntilAnimation, setHoldDisplayUntilAnimation] =
     useState<boolean>(false);
-
-  type ConfettiPiece = {
-    id: number;
-    left: number; // percent offset inside container
-    color: string;
-    delay: number; // ms
-    rotate: number;
-  };
-
-  const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
-
-  const spawnConfetti = (count = 20) => {
-    const colors = ["#ffd166", "#06d6a0", "#118ab2", "#ef476f", "#ffd700"];
-    const pieces: ConfettiPiece[] = Array.from({ length: count }).map(
-      (_, i) => ({
-        id: Date.now() + i,
-        left: Math.random() * 100,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        delay: Math.random() * 200,
-        rotate: Math.floor(Math.random() * 360),
-      })
-    );
-    setConfettiPieces(pieces);
-
-    // clear after animation finishes (duration + max delay + buffer)
-    window.setTimeout(() => setConfettiPieces([]), 1400);
-  };
 
   // ease helper for nicer numeric animation
   const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -137,6 +112,17 @@ export default function HomePage() {
       if (animRef.current) cancelAnimationFrame(animRef.current);
     };
   }, []);
+
+  // Watch lastDelta (the per-round score that was last added). If it's >= 950,
+  // trigger a short subtle confetti rain. We auto-hide after a short duration.
+  useEffect(() => {
+    if (lastDelta >= 950) {
+      setShowConfetti(true);
+      const id = window.setTimeout(() => setShowConfetti(false), 3000);
+      return () => window.clearTimeout(id);
+    }
+    return;
+  }, [lastDelta]);
   const [roundLocked, setRoundLocked] = useState<boolean>(false);
   const [pendingNextRound, setPendingNextRound] = useState<boolean>(false);
   const [color, setColor] = useState<SliderProps["color"] | string>("primary");
@@ -309,11 +295,6 @@ export default function HomePage() {
     setLastDelta(scoreForRound);
     setShowDelta(true);
 
-    // spawn confetti for very large single-round scores
-    if (scoreForRound > 950) {
-      spawnConfetti(26);
-    }
-
     // hide delta after 600ms then start increment animation
     window.setTimeout(() => {
       setShowDelta(false);
@@ -408,6 +389,8 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto my-auto d-flex">
+      {/* Confetti overlay (client-only). Component returns null when inactive. */}
+      <Confetti active={showConfetti} duration={3000} />
       {currentData ? (
         <div className="d-flex gap-2 mx-auto" id="container">
           <div
@@ -452,23 +435,6 @@ export default function HomePage() {
                   ) : null}
                   {/* show max possible score based on rounds */}
                   <span className="score-max">/{ROUNDS * 1000}</span>
-                  {/* Confetti overlay (renders briefly when spawned) */}
-                  {confettiPieces.length > 0 ? (
-                    <div className="confetti-container" aria-hidden>
-                      {confettiPieces.map((p) => (
-                        <span
-                          key={p.id}
-                          className="confetti-piece"
-                          style={{
-                            left: `${p.left}%`,
-                            background: p.color,
-                            transform: `rotate(${p.rotate}deg)`,
-                            animationDelay: `${p.delay}ms`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
                 </span>
               </h5>
 
