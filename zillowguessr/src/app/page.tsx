@@ -414,7 +414,7 @@ export default function HomePage() {
             className="half-width p-lg-4 p-2"
             style={{ backgroundColor: "var(--card-bg)" }}
           >
-            <h2 className="my-0">{currentData.address}</h2>
+            <h1 className="my-0">{currentData.address}</h1>
             <div className="d-flex justify-content-between">
               <h4>{currentData.city_state_zipcode}</h4>
               <div className="property-data d-flex gap-2">
@@ -450,7 +450,8 @@ export default function HomePage() {
                   {showDelta ? (
                     <span className={`score-delta show`}>+{lastDelta}</span>
                   ) : null}
-
+                  {/* show max possible score based on rounds */}
+                  <span className="score-max">/{ROUNDS * 1000}</span>
                   {/* Confetti overlay (renders briefly when spawned) */}
                   {confettiPieces.length > 0 ? (
                     <div className="confetti-container" aria-hidden>
