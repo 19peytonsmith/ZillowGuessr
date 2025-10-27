@@ -1,17 +1,26 @@
 body,
 html {
+  position: relative;
+  padding: 0;
   margin: 0;
   /* Use CSS variables so theme can be toggled */
   background-color: var(--bg);
-  font-family: system-ui, sans-serif;
-  font-weight: normal;
+  /* Use the Lexend Exa variable (from next/font) with sensible fallbacks */
+  font-family: var(--font-lexend-exa), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 /* Score animation styles */
 .score-inline {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   position: relative;
 }
 .score-number {
@@ -47,42 +56,12 @@ html {
   }
 }
 
-/* Confetti styles */
-.confetti-container {
-  position: absolute;
-  left: 50%;
-  top: -56px; /* start higher so pieces burst above the score */
-  transform: translateX(-50%);
-  width: 160px; /* tighter spread centered on the score */
-  height: 120px;
-  pointer-events: none;
-  overflow: visible;
-}
-.confetti-piece {
-  position: absolute;
-  top: 0; /* start at top of container */
-  width: 8px;
-  height: 12px;
-  border-radius: 2px;
-  opacity: 0;
-  transform-origin: center;
-  will-change: transform, opacity;
-  /* animate upward (negative translateY) and keep final state (fill-mode both) */
-  animation: confetti-rise 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-@keyframes confetti-rise {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    /* smaller rise so confetti doesn't go too far up */
-    transform: translateY(-48px) rotate(420deg) scale(0.9);
-  }
+/* small muted max-score text shown next to the main score */
+.score-max {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
+  align-self: self-end;
 }
 
 /* Theme variables: default to light theme. Toggle by setting
@@ -114,8 +93,10 @@ html {
   --slider-mark-active: var(--accent);
   --slider-mark-label: var(--muted);
   --slider-track: var(--accent);
-  --slider-rail: rgba(2, 6, 23, 0.06);
+  --slider-rail: var(--shadow);
   --slider-thumb: var(--accent);
+  /* Global letter-spacing (tracking). Negative values tighten the font when it's too loose. */
+  --tracking: -0.1em;
 }
 
 [data-theme="dark"] {
@@ -157,6 +138,8 @@ h4,
 h5,
 h6 {
   color: var(--text) !important;
+  /* I prefer tighter letter-spacing for headings */
+  letter-spacing: calc(var(--tracking) * 1.1);
 }
 
 .fixed-size {
@@ -185,8 +168,10 @@ h6 {
   font-size: 0.8rem;
 }
 
-.half-width {
-  width: 50vw;
+.main-content {
+  z-index: 10;
+  width: 100%;
+  max-width: 1000px;
   min-height: 100vh;
   box-shadow: 0 4px 20px color-mix(in srgb, var(--card-bg) 40%, black 20%);
 }
@@ -227,6 +212,7 @@ h6 {
 .MuiSlider-root .MuiSlider-valueLabel {
   color: var(--bg) !important;
   background: var(--text) !important;
+  font-family: var(--font-lexend-exa);
 }
 
 /* Subtle bounce + settle used by PriceIndicators when shown after a guess */
@@ -255,18 +241,6 @@ h6 {
   will-change: transform, opacity;
 }
 
-@media (max-width: 992px) {
-  .half-width {
-    width: 75vw;
-  }
-}
-
-@media (max-width: 480px) {
-  .half-width {
-    width: 90vw;
-  }
-}
-
 /* Map slide down/up animation */
 .map-embed-container {
   overflow: hidden;
@@ -293,7 +267,7 @@ h6 {
 
 /* Theme toggle button (lightweight) */
 .theme-toggle {
-  position: fixed;
+  position: absolute;
   right: 18px;
   top: 18px;
   width: 40px;
@@ -304,7 +278,6 @@ h6 {
   border-radius: 8px;
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(6px);
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
   color: var(--text);
@@ -343,6 +316,24 @@ h6 {
 .btn-outline-secondary {
   color: var(--btn-secondary) !important;
   border-color: var(--btn-secondary) !important;
+}
+.btn-text {
+  /* ensure inline button text uses inherited tracking unless overridden */
+  letter-spacing: inherit;
+}
+
+/* Ensure Bootstrap and MUI buttons pick up the global tracking variable.
+   Some component libraries inject their own letter-spacing; use a specific
+   selector and !important to ensure consistent tracking across buttons. */
+.btn,
+.btn *,
+.MuiButton-root,
+.MuiButton-root *,
+button,
+input[type="button"],
+input[type="submit"] {
+  letter-spacing: var(--tracking, 0) !important;
+  font-family: var(--font-lexend-exa) !important;
 }
 .text-success {
   color: var(--btn-success) !important;

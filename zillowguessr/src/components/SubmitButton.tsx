@@ -2,7 +2,6 @@
 
 import React from "react";
 import Button from "@mui/material/Button";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 interface SubmitButtonProps {
   onClick?: () => void;

@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Lexend_Exa } from "next/font/google";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/app.css";
 import "../styles/skeleton.css";
-import ThemeToggle from "../components/ThemeToggle";
+import HouseBackground from "@/components/HouseBackground";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const lexendExa = Lexend_Exa({
+  variable: "--font-lexend-exa",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,12 +24,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* Theme toggle lives outside main content so it's always visible */}
-        <ThemeToggle />
-        {children}
+      <body className={`${lexendExa.variable} antialiased relative`}>
+        <HouseBackground
+          zIndex={0}
+          minSize={10}
+          maxSize={1200}
+          minSpeed={8}
+          maxSpeed={50}
+        />
+        <main>{children}</main>
       </body>
     </html>
   );

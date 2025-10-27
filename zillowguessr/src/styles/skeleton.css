@@ -25,7 +25,12 @@
   border-radius: 12px;
 }
 .skeleton-score {
-  width: 15%;
+  width: 25%;
+  height: 25px;
+  margin: 8px 0;
+}
+.skeleton-show-map {
+  width: 25%;
   height: 25px;
   margin: 8px 0;
 }
@@ -85,8 +90,9 @@
 
 @media (max-width: 576px) {
   .carousel-center {
-    height: 70%;
-    max-width: 70%;
+    aspect-ratio: 1/1;
+    max-width: 100%;
+    width: 100%;
   }
   .carousel-left,
   .carousel-right {
