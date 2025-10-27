@@ -14,8 +14,8 @@ type PriceIndicatorsProps = {
 export default function PriceIndicators({
   value,
   prettyValue,
-  chosenColor = "#1976d2",
-  actualColor = "#28a745",
+  chosenColor = "var(--price-chosen)",
+  actualColor = "var(--price-actual)",
   top = -20,
 }: PriceIndicatorsProps) {
   const toPercent = (v: number) => `${(v / 1000) * 100}%`;
@@ -58,14 +58,14 @@ export default function PriceIndicators({
           className="price-indicator-label price-indicator-animate"
           // use inline styles for color/border to keep them configurable from props
           style={{
-            background: "white",
+            background: "var(--card-bg)",
             border: `1px solid ${chosenColor}`,
             color: chosenColor,
             padding: "2px 6px",
             borderRadius: 6,
             fontSize: 12,
             fontWeight: 600,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            boxShadow: "0 1px 3px var(--shadow)",
           }}
         >
           Your guess: {prettyValue(value[0])}
@@ -89,14 +89,14 @@ export default function PriceIndicators({
         <div
           className="price-indicator-label price-indicator-animate"
           style={{
-            background: "white",
+            background: "var(--card-bg)",
             border: `1px solid ${actualColor}`,
             color: actualColor,
             padding: "2px 6px",
             borderRadius: 6,
             fontSize: 12,
             fontWeight: 600,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            boxShadow: "0 1px 3px var(--shadow)",
           }}
         >
           Actual: {prettyValue(value[1])}

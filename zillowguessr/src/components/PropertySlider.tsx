@@ -49,8 +49,8 @@ export default function PropertySlider({
         <PriceIndicators
           value={value as [number, number]}
           prettyValue={prettyValue}
-          chosenColor="#1976d2"
-          actualColor="#28a745"
+          chosenColor={"var(--price-chosen)"}
+          actualColor={"var(--price-actual)"}
           top={topOffset}
         />
       )}

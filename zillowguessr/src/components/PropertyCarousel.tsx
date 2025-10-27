@@ -68,7 +68,11 @@ export default function PropertyCarousel({
             zIndex: 10,
           }}
         >
-          <Status color="#000000" length={items.length} curIndex={curIndex} />
+          <Status
+            color="var(--status)"
+            length={items.length}
+            curIndex={curIndex}
+          />
         </div>
       </Carousel>
     </PhotoProvider>

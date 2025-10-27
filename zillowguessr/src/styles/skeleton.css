@@ -1,5 +1,10 @@
 .skeleton {
-  background: linear-gradient(90deg, #e6e6e6 25%, #f2f2f2 50%, #e6e6e6 75%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-1) 25%,
+    var(--skeleton-2) 50%,
+    var(--skeleton-3) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.4s ease-in-out infinite;
   border-radius: 4px;
@@ -20,7 +25,12 @@
   border-radius: 12px;
 }
 .skeleton-score {
-  width: 15%;
+  width: 25%;
+  height: 25px;
+  margin: 8px 0;
+}
+.skeleton-show-map {
+  width: 25%;
   height: 25px;
   margin: 8px 0;
 }
@@ -80,8 +90,9 @@
 
 @media (max-width: 576px) {
   .carousel-center {
-    height: 70%;
-    max-width: 70%;
+    aspect-ratio: 1/1;
+    max-width: 100%;
+    width: 100%;
   }
   .carousel-left,
   .carousel-right {

@@ -1,17 +1,145 @@
 body,
 html {
+  position: relative;
+  padding: 0;
   margin: 0;
-  background-color: #16423c;
-  font-family: system-ui, sans-serif;
-  font-weight: normal;
+  /* Use CSS variables so theme can be toggled */
+  background-color: var(--bg);
+  /* Use the Lexend Exa variable (from next/font) with sensible fallbacks */
+  font-family: var(--font-lexend-exa), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Prevent layout shift when content height changes (like toggling the map) */
-html {
-  scrollbar-gutter: stable;
+* {
+  box-sizing: border-box;
 }
+
+/* Score animation styles */
+.score-inline {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.score-number {
+  font-variant-numeric: tabular-nums;
+  transition: color 240ms ease;
+  color: var(--price-actual);
+}
+.score-number.anim {
+  /* use the positive/text-success color while animating so it matches final state */
+  color: var(--price-positive, #28a745) !important;
+}
+.score-delta {
+  margin-left: 6px;
+  color: var(--price-positive, #28a745);
+  font-weight: 700;
+  position: relative;
+  opacity: 0;
+  transform: translateY(0);
+  transition: transform 600ms ease, opacity 600ms ease;
+}
+.score-delta.show {
+  opacity: 1;
+  animation: delta-move 600ms ease forwards;
+}
+@keyframes delta-move {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+/* small muted max-score text shown next to the main score */
+.score-max {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
+  align-self: self-end;
+}
+
+/* Theme variables: default to light theme. Toggle by setting
+   `data-theme="dark"` on the <html> element. */
+:root {
+  /* Core */
+  --bg: #ffffff;
+  --text: #0f1720; /* primary text */
+  --muted: #6b7280; /* secondary text */
+  --card-bg: #f8fafc;
+  --accent: #16423c; /* preserved accent color */
+  --shadow: rgba(2, 6, 23, 0.08);
+  /* Semantic colors used in components */
+  --price-chosen: #1976d2;
+  --price-actual: #28a745;
+  --status: #000000;
+  --leaderboard-bg: #f0f0f0;
+  /* skeleton */
+  --skeleton-1: #e6e6e6;
+  --skeleton-2: #f2f2f2;
+  --skeleton-3: #e6e6e6;
+  --text-light: #e0e0e0; /* use where a lighter text is explicitly desired */
+  /* Button tokens */
+  --btn-primary: var(--accent);
+  --btn-success: var(--price-actual);
+  --btn-secondary: var(--muted);
+  /* Slider tokens */
+  --slider-mark: var(--muted);
+  --slider-mark-active: var(--accent);
+  --slider-mark-label: var(--muted);
+  --slider-track: var(--accent);
+  --slider-rail: var(--shadow);
+  --slider-thumb: var(--accent);
+  /* Global letter-spacing (tracking). Negative values tighten the font when it's too loose. */
+  --tracking: -0.1em;
+}
+
+[data-theme="dark"] {
+  --bg: #08151a; /* dark teal/near-black */
+  --text: #e6eef0;
+  --muted: #9ca3af;
+  --card-bg: #0b1220;
+  --accent: #2dd4bf;
+  --shadow: rgba(0, 0, 0, 0.5);
+  /* keep chosen/actual colors but adapt status/leaderboard to dark background */
+  --price-chosen: #1976d2;
+  --price-actual: #28a745;
+  --status: #e6eef0;
+  --leaderboard-bg: var(--card-bg);
+  --skeleton-1: #0f1720;
+  --skeleton-2: #0b1220;
+  --skeleton-3: #0f1720;
+  --text-light: #e0e0e0;
+  --btn-primary: var(--accent);
+  --btn-success: var(--price-actual);
+  --btn-secondary: var(--muted);
+}
+
 body {
   overflow-y: scroll;
+}
+
+/* Basic color utilities using variables */
+body {
+  color: var(--text);
+  background: var(--bg) !important;
+}
+
+/* Ensure headings follow the theme color (override library defaults if necessary) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text) !important;
+  /* I prefer tighter letter-spacing for headings */
+  letter-spacing: calc(var(--tracking) * 1.1);
 }
 
 .fixed-size {
@@ -29,7 +157,7 @@ body {
 }
 
 .light-text {
-  color: #e0e0e0;
+  color: var(--text-light);
 }
 
 .fill-black {
@@ -40,13 +168,51 @@ body {
   font-size: 0.8rem;
 }
 
-.half-width {
-  width: 50vw;
+.main-content {
+  z-index: 10;
+  width: 100%;
+  max-width: 1000px;
   min-height: 100vh;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--card-bg) 40%, black 20%);
 }
 
 .MuiSlider-thumb {
   transition: all 1s ease-in-out;
+}
+
+/* Material UI Slider overrides to ensure good contrast in both themes */
+.MuiSlider-root {
+  --_slider-mark: var(--slider-mark);
+}
+.MuiSlider-root .MuiSlider-mark {
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  background-color: var(--slider-mark) !important;
+}
+.MuiSlider-root .MuiSlider-mark.MuiSlider-markActive {
+  background-color: var(--slider-mark-active) !important;
+}
+.MuiSlider-root .MuiSlider-markLabel {
+  color: var(--slider-mark-label) !important;
+}
+.MuiSlider-root .MuiSlider-rail {
+  background-color: var(--slider-rail) !important;
+  opacity: 1 !important;
+}
+.MuiSlider-root .MuiSlider-track {
+  background-color: var(--slider-track) !important;
+}
+.MuiSlider-root .MuiSlider-thumb {
+  background-color: var(--slider-thumb) !important;
+  color: var(--slider-thumb) !important;
+  box-shadow: 0 2px 6px var(--shadow);
+  border: 2px solid var(--bg);
+}
+.MuiSlider-root .MuiSlider-valueLabel {
+  color: var(--bg) !important;
+  background: var(--text) !important;
+  font-family: var(--font-lexend-exa);
 }
 
 /* Subtle bounce + settle used by PriceIndicators when shown after a guess */
@@ -75,18 +241,6 @@ body {
   will-change: transform, opacity;
 }
 
-@media (max-width: 992px) {
-  .half-width {
-    width: 75vw;
-  }
-}
-
-@media (max-width: 480px) {
-  .half-width {
-    width: 90vw;
-  }
-}
-
 /* Map slide down/up animation */
 .map-embed-container {
   overflow: hidden;
@@ -108,5 +262,113 @@ body {
   width: 100%;
   height: 320px;
   border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px var(--shadow);
 }
+
+/* Theme toggle button (lightweight) */
+.theme-toggle {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  color: var(--text);
+}
+.theme-toggle:hover {
+  transform: translateY(-2px);
+}
+.theme-toggle:active {
+  transform: translateY(0);
+}
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Make bootstrap outline buttons and small helpers follow theme variables where used */
+.btn-outline-primary {
+  color: var(--btn-primary) !important;
+  border-color: var(--btn-primary) !important;
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--btn-primary) !important;
+  color: var(--bg) !important;
+}
+.btn-outline-success {
+  color: var(--btn-success) !important;
+  border-color: var(--btn-success) !important;
+}
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+  background-color: var(--btn-success) !important;
+  color: var(--bg) !important;
+}
+.btn-outline-secondary {
+  color: var(--btn-secondary) !important;
+  border-color: var(--btn-secondary) !important;
+}
+.btn-text {
+  /* ensure inline button text uses inherited tracking unless overridden */
+  letter-spacing: inherit;
+}
+
+/* Ensure Bootstrap and MUI buttons pick up the global tracking variable.
+   Some component libraries inject their own letter-spacing; use a specific
+   selector and !important to ensure consistent tracking across buttons. */
+.btn,
+.btn *,
+.MuiButton-root,
+.MuiButton-root *,
+button,
+input[type="button"],
+input[type="submit"] {
+  letter-spacing: var(--tracking, 0) !important;
+  font-family: var(--font-lexend-exa) !important;
+}
+.text-success {
+  color: var(--btn-success) !important;
+}
+.icon-link svg {
+  /* ensure icons pick up button/text color */
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* Button text bounce on hover */
+@keyframes text-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.btn-text {
+  display: inline-block;
+  will-change: transform;
+}
+
+.MuiButton-root:hover .btn-text {
+  animation: text-bounce 1000ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+
+/* Additional styles can be added here if needed */
