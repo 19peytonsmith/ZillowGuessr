@@ -3,8 +3,14 @@ html {
   margin: 0;
   /* Use CSS variables so theme can be toggled */
   background-color: var(--bg);
-  font-family: system-ui, sans-serif;
-  font-weight: normal;
+  /* Use the Lexend Exa variable (from next/font) with sensible fallbacks */
+  font-family: var(--font-lexend-exa), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Global tracking (letter-spacing) — tweak --tracking in :root to adjust */
+  letter-spacing: var(--tracking, 0);
 }
 
 /* Score animation styles */
@@ -113,8 +119,10 @@ html {
   --slider-mark-active: var(--accent);
   --slider-mark-label: var(--muted);
   --slider-track: var(--accent);
-  --slider-rail: rgba(2, 6, 23, 0.06);
+  --slider-rail: var(--shadow);
   --slider-thumb: var(--accent);
+  /* Global letter-spacing (tracking). Negative values tighten the font when it's too loose. */
+  --tracking: -0.1em;
 }
 
 [data-theme="dark"] {
@@ -156,6 +164,8 @@ h4,
 h5,
 h6 {
   color: var(--text) !important;
+  /* I prefer tighter letter-spacing for headings */
+  letter-spacing: calc(var(--tracking) * 1.1);
 }
 
 .fixed-size {
@@ -226,6 +236,7 @@ h6 {
 .MuiSlider-root .MuiSlider-valueLabel {
   color: var(--bg) !important;
   background: var(--text) !important;
+  font-family: var(--font-lexend-exa);
 }
 
 /* Subtle bounce + settle used by PriceIndicators when shown after a guess */
@@ -342,6 +353,24 @@ h6 {
 .btn-outline-secondary {
   color: var(--btn-secondary) !important;
   border-color: var(--btn-secondary) !important;
+}
+.btn-text {
+  /* ensure inline button text uses inherited tracking unless overridden */
+  letter-spacing: inherit;
+}
+
+/* Ensure Bootstrap and MUI buttons pick up the global tracking variable.
+   Some component libraries inject their own letter-spacing; use a specific
+   selector and !important to ensure consistent tracking across buttons. */
+.btn,
+.btn *,
+.MuiButton-root,
+.MuiButton-root *,
+button,
+input[type="button"],
+input[type="submit"] {
+  letter-spacing: var(--tracking, 0) !important;
+  font-family: var(--font-lexend-exa) !important;
 }
 .text-success {
   color: var(--btn-success) !important;
