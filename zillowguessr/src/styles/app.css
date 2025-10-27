@@ -1,5 +1,7 @@
 body,
 html {
+  position: relative;
+  padding: 0;
   margin: 0;
   /* Use CSS variables so theme can be toggled */
   background-color: var(--bg);
@@ -9,6 +11,10 @@ html {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 /* Score animation styles */
@@ -162,8 +168,10 @@ h6 {
   font-size: 0.8rem;
 }
 
-.half-width {
-  width: 50vw;
+.main-content {
+  z-index: 10;
+  width: 100%;
+  max-width: 1000px;
   min-height: 100vh;
   box-shadow: 0 4px 20px color-mix(in srgb, var(--card-bg) 40%, black 20%);
 }
@@ -233,18 +241,6 @@ h6 {
   will-change: transform, opacity;
 }
 
-@media (max-width: 992px) {
-  .half-width {
-    width: 75vw;
-  }
-}
-
-@media (max-width: 480px) {
-  .half-width {
-    width: 90vw;
-  }
-}
-
 /* Map slide down/up animation */
 .map-embed-container {
   overflow: hidden;
@@ -271,9 +267,9 @@ h6 {
 
 /* Theme toggle button (lightweight) */
 .theme-toggle {
-  position: fixed;
+  position: absolute;
   right: 18px;
-  top: 18px;
+  bottom: 18px;
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -282,7 +278,6 @@ h6 {
   border-radius: 8px;
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(6px);
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
   color: var(--text);
