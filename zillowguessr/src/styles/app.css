@@ -11,7 +11,6 @@ html {
 .score-inline {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   position: relative;
 }
 .score-number {
