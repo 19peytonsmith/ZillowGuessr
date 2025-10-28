@@ -348,8 +348,25 @@ export default function HomePage() {
 
   const handleGetResults = () => {
     const stored = Cookies.get("leaderboardScores");
-    const existing: number[] = stored ? JSON.parse(stored) : [];
-    const updated = [...existing, total];
+    const existingRaw = stored ? JSON.parse(stored) : [];
+    // Migrate legacy numeric-only array to objects with timestamp.
+    const existing = Array.isArray(existingRaw)
+      ? (existingRaw
+          .map((it: unknown) => {
+            if (typeof it === "number") return { score: it, ts: null };
+            if (it && typeof it === "object" && "score" in it) {
+              const o = it as { score?: unknown; ts?: unknown };
+              const scoreVal = typeof o.score === "number" ? o.score : 0;
+              const tsVal = typeof o.ts === "number" ? o.ts : null;
+              return { score: scoreVal, ts: tsVal };
+            }
+            return null;
+          })
+          .filter(Boolean) as { score: number; ts: number | null }[])
+      : [];
+
+    const updated = [...existing, { score: total, ts: Date.now() }];
+
     Cookies.set("leaderboardScores", JSON.stringify(updated), { expires: 7 });
 
     router.push("/leaderboards");
