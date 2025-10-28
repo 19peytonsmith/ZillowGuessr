@@ -321,7 +321,7 @@ export default function Leaderboard() {
       </div>
       {loading ? (
         <LeaderboardLoadingSkeleton />
-      ) : leaderboardScores.length < 0 ? (
+      ) : leaderboardScores.length > 0 ? (
         <>
           <div className="leaderboard-card">
             <h2>Your Total Scores</h2>
