@@ -388,4 +388,12 @@ input[type="submit"] {
   animation: text-bounce 1000ms cubic-bezier(0.22, 0.9, 0.35, 1);
 }
 
-/* Additional styles can be added here if needed */
+/* Prevent theme-toggle overlap on small screens by giving the page title a
+   small top margin and extra right padding so the absolute-positioned toggle
+   doesn't sit on top of the h1 text. */
+@media (max-width: 640px) {
+  .main-content h1 {
+    margin-top: 22px !important;
+    padding-right: 64px; /* leave room for the 40x40 toggle + some gutter */
+  }
+}

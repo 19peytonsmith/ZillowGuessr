@@ -9,7 +9,7 @@ type Props = {
 
 // Subtle confetti rain from the top. Small particle count, pastel colors,
 // low opacity and short duration for a non-flashy effect.
-export default function Confetti({ active, duration = 3000 }: Props) {
+export default function Confetti({ active, duration = 5000 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -80,12 +80,6 @@ export default function Confetti({ active, duration = 3000 }: Props) {
         p.x += p.vx;
         p.y += p.vy;
         p.rot += p.rotV;
-
-        // recycle if below the canvas
-        if (p.y > height + 30) {
-          p.y = -10 - Math.random() * 40;
-          p.x = Math.random() * width;
-        }
 
         ctx.save();
         ctx.translate(p.x, p.y);

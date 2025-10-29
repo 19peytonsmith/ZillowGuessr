@@ -20,11 +20,6 @@ export default function PriceIndicators({
 }: PriceIndicatorsProps) {
   const toPercent = (v: number) => `${(v / 1000) * 100}%`;
 
-  // If the two indicators are very close in slider units (0-1000), consider
-  // them overlapping and render the guessed indicator below the slider.
-  const OVERLAP_THRESHOLD = 200; // units out of 1000 (~20%)
-  const isOverlapping = Math.abs(value[0] - value[1]) <= OVERLAP_THRESHOLD;
-
   // Trigger animation when the value changes (i.e., after a guess is made)
   const [animateKey, setAnimateKey] = React.useState(0);
 
@@ -44,7 +39,7 @@ export default function PriceIndicators({
         style={{
           position: "absolute",
           // if overlapping, move guessed indicator below the slider by adding vertical offset
-          top: isOverlapping ? top + 60 : top,
+          top: top + 60,
           left: toPercent(value[0]),
           transform: "translateX(-50%)",
           display: "flex",

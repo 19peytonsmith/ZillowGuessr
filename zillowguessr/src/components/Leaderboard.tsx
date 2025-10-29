@@ -35,6 +35,35 @@ export default function Leaderboard() {
   const loadStartRef = useRef<number | null>(null);
   const minLoadingRef = useRef<number | null>(null);
 
+  // Touch / tooltip handling: on touch devices we prefer click-to-toggle tooltips
+  const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
+  const [openTooltipPlay, setOpenTooltipPlay] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    setIsTouchDevice(touch);
+  }, []);
+
+  // close the open tooltip if the user clicks/taps outside of the timestamp icon
+  useEffect(() => {
+    if (openTooltipPlay == null) return;
+    const onDocClick = (e: MouseEvent) => {
+      const el = document.querySelector(
+        `[data-tooltip-pn="${openTooltipPlay}"]`
+      ) as HTMLElement | null;
+      if (!el) {
+        setOpenTooltipPlay(null);
+        return;
+      }
+      if (!el.contains(e.target as Node)) {
+        setOpenTooltipPlay(null);
+      }
+    };
+    document.addEventListener("click", onDocClick, true);
+    return () => document.removeEventListener("click", onDocClick, true);
+  }, [openTooltipPlay]);
+
   useEffect(() => {
     // make parsing async so we can show a skeleton while cookie reads/parsing are "pending"
     setLoading(true);
@@ -131,6 +160,8 @@ export default function Leaderboard() {
   const listRef = useRef<HTMLUListElement | null>(null);
   const prevPositionsRef = useRef<Map<number, number>>(new Map());
   const animStepRef = useRef<number | null>(null);
+  const landingTimeoutRef = useRef<number | null>(null);
+  const [landedPlayNumber, setLandedPlayNumber] = useState<number | null>(null);
 
   // FLIP-style layout animation whenever rendered ordering or displayedScores changes
   useLayoutEffect(() => {
@@ -180,6 +211,11 @@ export default function Leaderboard() {
         animStepRef.current = null;
       }
       setHighlightedPlayNumber(null);
+      if (landingTimeoutRef.current) {
+        window.clearTimeout(landingTimeoutRef.current);
+        landingTimeoutRef.current = null;
+      }
+      setLandedPlayNumber(null);
     };
   }, []);
 
@@ -202,6 +238,14 @@ export default function Leaderboard() {
             // celebrate first place
             setShowConfetti(true);
           }
+          // mark this play number as 'landed' to trigger a finished animation
+          setLandedPlayNumber(pn);
+          if (landingTimeoutRef.current)
+            window.clearTimeout(landingTimeoutRef.current);
+          landingTimeoutRef.current = window.setTimeout(() => {
+            setLandedPlayNumber(null);
+            landingTimeoutRef.current = null;
+          }, 900);
           // clear animating flag
           setAnimatingEntry(null);
           // remove the blue highlight; if the row is top-3 the rank styles will apply
@@ -275,17 +319,53 @@ export default function Leaderboard() {
         data-play-number={entry.playNumber}
         className={`leaderboard-item rank-${idx + 1} ${
           highlightedPlayNumber === entry.playNumber ? "animating" : ""
-        }`}
+        } ${landedPlayNumber === entry.playNumber ? "landed" : ""}`}
         key={entry.playNumber}
       >
         <span className="score-label">
           Game <span className="play-number">#</span>
           {entry.playNumber}
           {entry.ts ? (
-            <Tooltip title={formatAchieved(entry.ts)} arrow>
+            <Tooltip
+              title={formatAchieved(entry.ts)}
+              arrow
+              disableHoverListener={isTouchDevice}
+              disableFocusListener={isTouchDevice}
+              // disable MUI's built-in touch handling on touch devices because
+              // we implement click-to-toggle behavior instead
+              disableTouchListener={isTouchDevice}
+              open={
+                isTouchDevice ? openTooltipPlay === entry.playNumber : undefined
+              }
+              onClose={() => isTouchDevice && setOpenTooltipPlay(null)}
+            >
               <span
                 className="timestamp-icon"
                 aria-label={formatAchieved(entry.ts)}
+                data-tooltip-pn={entry.playNumber}
+                onPointerUp={(e: React.PointerEvent<HTMLSpanElement>) => {
+                  // prefer pointer-up for touch compatibility; ignore non-touch pointer types
+                  // but still allow toggling when our touch-detection heuristic matches
+                  // (covers some hybrid devices)
+                  const pType = e.pointerType;
+                  if (!isTouchDevice && pType && pType !== "touch") return;
+                  e.stopPropagation();
+                  setOpenTooltipPlay((prev) =>
+                    prev === entry.playNumber ? null : entry.playNumber
+                  );
+                }}
+                onKeyDown={(e) => {
+                  if (!isTouchDevice) return;
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setOpenTooltipPlay((prev) =>
+                      prev === entry.playNumber ? null : entry.playNumber
+                    );
+                  }
+                  if (e.key === "Escape") setOpenTooltipPlay(null);
+                }}
+                role={isTouchDevice ? "button" : undefined}
+                tabIndex={isTouchDevice ? 0 : -1}
               >
                 <svg
                   width="12"
