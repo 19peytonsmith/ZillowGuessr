@@ -136,7 +136,7 @@ export default function Leaderboard() {
     if (!leaderboardScores || leaderboardScores.length === 0) return;
     const last = leaderboardScores[leaderboardScores.length - 1];
     // Consider it "just played" if timestamp is very recent (30s)
-    const recentWindow = 300 * 1000;
+    const recentWindow = 30 * 1000;
     if (last && last.ts && Date.now() - last.ts < recentWindow) {
       // Move newly-played entry to the bottom of the render order and hold there for 1s
       setRenderOrder((prev) => {
