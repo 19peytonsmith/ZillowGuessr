@@ -1,0 +1,691 @@
+/* GitHub icon styled like the theme toggle (for footer usage) */
+.theme-like {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: var(--text);
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.theme-like:hover {
+  transform: translateY(-2px);
+}
+
+/* Animated breathing gradient for the splash card. Kept at top-level so
+   it's valid CSS and applies correctly. */
+.main-content.splash-hero {
+  position: relative; /* for the pseudo-element */
+  overflow: hidden; /* ensure the animated background is clipped to the card */
+}
+
+/* Ensure the theme toggle participates in the splash header layout
+   (app.css makes .theme-toggle absolute by default). Use a specific
+   selector and !important so splash layout keeps the toggle inline. */
+.main-content.splash-hero .theme-toggle {
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+}
+
+/* Improve border contrast for the theme toggle and GitHub icon inside
+   the splash card by using the theme-aware text color for the border. This
+   ensures good visibility in dark mode as --text flips to a light color. */
+.main-content.splash-hero .theme-toggle,
+.main-content.splash-hero .theme-like {
+  border-color: color-mix(in srgb, var(--text) 14%, transparent) !important;
+  background: transparent !important;
+}
+
+/* Energy drink / tip button — small pill that matches the other controls */
+.energy-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 160ms ease, transform 160ms ease, border-color 160ms ease;
+  height: 40px; /* match theme-like / theme-toggle */
+  line-height: 1;
+}
+.energy-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.energy-btn:hover {
+  color: var(--btn-primary) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 26%,
+    transparent
+  ) !important;
+  transform: translateY(-2px);
+}
+
+/* Subtle lightning zap animation for the bolt icon on hover. Kept short
+   and muted so it's decorative and doesn't distract. Uses a slight
+   rotation/scale with a soft colored drop-shadow that matches the
+   primary accent. */
+.main-content.splash-hero .energy-btn svg {
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    filter 220ms ease;
+}
+
+@keyframes bolt-zap {
+  0% {
+    transform: rotate(0) scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+    opacity: 1;
+  }
+  25% {
+    transform: rotate(-6deg) scale(1.08);
+    filter: drop-shadow(
+      0 0 8px color-mix(in srgb, var(--btn-primary) 60%, transparent)
+    );
+  }
+  55% {
+    transform: rotate(6deg) scale(1.02);
+    filter: drop-shadow(
+      0 0 6px color-mix(in srgb, var(--btn-primary) 44%, transparent)
+    );
+  }
+  100% {
+    transform: rotate(0) scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+    opacity: 1;
+  }
+}
+
+.main-content.splash-hero .energy-btn:hover svg {
+  animation: bolt-zap 420ms ease-out both;
+}
+
+/* Make the energy button text smaller so the long label fits nicely */
+.energy-btn .buy-energy-text {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+/* Ensure contact button matches height and alignment of theme-toggle/github */
+.main-content.splash-hero .btn-outline-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 40px !important;
+  /* increase horizontal padding for better balance with Play */
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+}
+
+/* Make sure icons inside controls are vertically centered and consistent */
+.main-content.splash-hero .icon-link svg,
+.main-content.splash-hero .theme-toggle svg,
+.main-content.splash-hero .theme-like svg,
+.main-content.splash-hero .energy-btn svg {
+  vertical-align: middle;
+}
+
+/* Make the GitHub icon behave like the other header controls on hover: use
+   the primary/accent color and a small lift so interactions feel consistent. */
+.main-content.splash-hero .theme-like:hover,
+.main-content.splash-hero .theme-toggle:hover {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+
+/* Ensure icons inherit the color so the SVG changes color on hover. */
+.main-content.splash-hero .theme-like svg,
+.main-content.splash-hero .theme-toggle svg {
+  color: inherit;
+  fill: currentColor;
+}
+
+/* Buttons in the splash: keep outline look but change text color on hover
+   rather than swapping to a filled background. This gives a cleaner
+   hover interaction for Contact Me and Leaderboards. */
+.main-content.splash-hero .btn-outline-secondary {
+  background: transparent !important;
+  /* Use the main text color for better contrast in the splash header */
+  color: var(--text) !important;
+  border-color: color-mix(in srgb, var(--text) 12%, transparent) !important;
+}
+.main-content.splash-hero .btn-outline-secondary:hover,
+.main-content.splash-hero .ghost-btn-accessible:hover {
+  background: transparent !important; /* keep outline look */
+  color: var(--btn-primary) !important; /* accent text on hover */
+  transform: translateY(-2px);
+}
+
+/* Slightly strengthen the GitHub/icon border on dark theme specifically */
+html[data-theme="dark"] .main-content.splash-hero .theme-like,
+html[data-theme="dark"] .main-content.splash-hero .theme-toggle {
+  border-color: color-mix(in srgb, var(--text) 22%, transparent) !important;
+}
+
+.main-content.splash-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0; /* place behind card content but above the element background */
+  border-radius: inherit;
+  /* layered background: main gradient + a tiny subtle grain layer to
+     break up banding. Increasing background-size and using a blend mode
+     reduces visible stepping while keeping the soft look. */
+  background-image: linear-gradient(
+      120deg,
+      rgba(164, 243, 208, 0.12) 0%,
+      rgba(132, 255, 193, 0.08) 28%,
+      rgba(134, 239, 172, 0.06) 62%,
+      rgba(255, 255, 255, 0.02) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.005) 0px,
+      rgba(255, 255, 255, 0.005) 1px,
+      transparent 2px
+    );
+  /* static subtle gradient: full-size background, small grain overlay */
+  background-size: 100% 100%, 100% 100%;
+  background-repeat: no-repeat, repeat;
+  background-blend-mode: overlay, normal;
+  filter: blur(6px) saturate(115%);
+  opacity: 0.95;
+  transition: opacity 600ms ease, filter 600ms ease;
+}
+
+/* Subtle animation for the title to give a bit of life without being
+   distracting: slow, smooth vertical float with a gentle shadow pulse.
+   Use more keyframes and a slightly longer duration for fluid motion. */
+.splash-title {
+  animation: title-subtle 8s cubic-bezier(0.22, 0.9, 0.35, 1) infinite;
+}
+
+@keyframes title-subtle {
+  0% {
+    transform: translateY(0);
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  20% {
+    transform: translateY(-1.2px);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.028);
+  }
+  40% {
+    transform: translateY(0.6px);
+    text-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+  }
+  60% {
+    transform: translateY(-0.5px);
+    text-shadow: 0 5px 12px rgba(0, 0, 0, 0.024);
+  }
+  80% {
+    transform: translateY(0.2px);
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.018);
+  }
+  100% {
+    transform: translateY(0);
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Ensure the splash card's immediate children render above the animated
+   background pseudo-element. This keeps the animation visible but the
+   UI elements interactable and crisp. */
+.main-content.splash-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes ripple-swipe {
+  0%,
+  74% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  76% {
+    transform: scale(0.6);
+    opacity: 0.28;
+  }
+  82% {
+    transform: scale(1.2);
+    opacity: 0.18;
+  }
+  88% {
+    transform: scale(1.6);
+    opacity: 0.06;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.splash-hero {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 920px;
+}
+
+/* Make the splash hero visually match leaderboard cards: use the same
+   translucent card background, blur/backdrop filter, border and subtle
+   shadow so the UI feels consistent. The card padding is provided by
+   the page markup (p-5), so we avoid overriding it here. */
+.main-content.splash-hero {
+  background-color: var(--leaderboard-bg);
+  /* Slight transparent mix when supported for a softer card look */
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 85%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Light-theme tweaks: make the animated gradient more visible in light
+   mode by slightly reducing the card's solid overlay and increasing the
+   pseudo-element opacity / stop alpha values. We target html:not([data-theme="dark"]) so
+   the dark theme keeps the previous, more subtle look. */
+html:not([data-theme="dark"]) .main-content.splash-hero {
+  /* reduce the card's opaque mix so the gradient shows through more */
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 72%, transparent);
+}
+
+html:not([data-theme="dark"]) .main-content.splash-hero::before {
+  background-image: linear-gradient(
+      120deg,
+      rgba(164, 243, 208, 0.18) 0%,
+      rgba(132, 255, 193, 0.12) 28%,
+      rgba(134, 239, 172, 0.1) 62%,
+      rgba(255, 255, 255, 0.04) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.006) 0px,
+      rgba(255, 255, 255, 0.006) 1px,
+      transparent 2px
+    );
+  opacity: 1;
+}
+.splash-title {
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  margin: 0 0 12px 0;
+  padding: 12px 24px;
+  will-change: transform, text-shadow;
+  backface-visibility: hidden;
+}
+.splash-title .subtle-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -30%);
+  font-size: 220px;
+  color: currentColor;
+  opacity: 0.06;
+  pointer-events: none;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.splash-lead {
+  font-size: 1.125rem;
+  margin-bottom: 20px;
+}
+
+.splash-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+  /* Stack CTAs (Play / Leaderboards) on separate rows */
+  flex-direction: column;
+}
+
+/* Improve splash title layout on small screens: center, take more width,
+   and reduce the subtle-mark so it doesn't push the title off-center. */
+@media (max-width: 768px) {
+  .splash-title {
+    font-size: clamp(32px, 10vw, 60px);
+    padding: 8px 12px !important;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+
+  .splash-title .subtle-mark {
+    font-size: 120px;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%, -50%);
+    opacity: 0.04;
+  }
+
+  /* Give the lead paragraph more breathing room on narrow screens */
+  .splash-lead {
+    padding: 0 8px;
+  }
+}
+
+/* Prominent Play button */
+.play-btn {
+  --btn-h: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--btn-h);
+  /* increased horizontal padding for a more prominent CTA */
+  padding: 0 56px;
+  font-size: 1.6rem;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--btn-primary),
+    color-mix(in srgb, var(--btn-primary) 70%, black 15%)
+  );
+  color: var(--bg) !important;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1), box-shadow 220ms;
+  position: relative;
+  overflow: visible;
+  text-decoration: none !important;
+}
+.play-btn:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
+}
+.play-btn .play-text {
+  display: inline-flex;
+  align-items: center;
+  overflow: visible;
+}
+.play-letter {
+  display: inline-block;
+  transform-origin: center;
+}
+.play-btn:hover .play-letter {
+  animation: play-letter-bounce 720ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+@keyframes play-letter-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-8px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Stagger delays for each letter — we'll set --i inline */
+.play-letter {
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+.play-btn:active {
+  transform: translateY(-2px) scale(0.995);
+}
+
+.splash-cta .play-btn {
+  margin-bottom: 12px;
+}
+
+.ghost-btn-accessible {
+  /* outlined but higher contrast text for accessibility */
+  color: color-mix(in srgb, var(--text) 90%, black 0%) !important;
+  border-color: color-mix(in srgb, var(--text) 60%, black 0%) !important;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.byline {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive: stack byline and links on small screens and center them */
+@media (max-width: 640px) {
+  .main-content.splash-hero .meta-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .main-content.splash-hero .meta-row .links {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .main-content.splash-hero .meta-row .byline {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.what-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Make the small question button match theme-toggle sizing and behaviors */
+.main-content.splash-hero .what-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  color: var(--text);
+  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1), color 220ms,
+    border-color 220ms;
+}
+
+.main-content.splash-hero .what-btn svg {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  fill: currentColor;
+}
+
+.main-content.splash-hero .what-btn:hover {
+  color: var(--btn-primary);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--btn-primary) 28%, transparent);
+}
+
+/* Slightly stronger border in dark theme to maintain contrast */
+html[data-theme="dark"] .main-content.splash-hero .what-btn {
+  border-color: color-mix(in srgb, var(--text) 22%, transparent);
+}
+
+/* Simple modal for the 'What is this' content */
+.splash-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 24px;
+}
+.splash-modal {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 760px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(2, 6, 23, 0.25);
+}
+
+/* Mobile adjustments: ensure modal fits and close button is reachable
+   even when content is long. Make the modal itself scrollable and pin
+   it near the top of the viewport. */
+@media (max-width: 640px) {
+  .splash-modal-backdrop {
+    align-items: flex-start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .splash-modal {
+    border-radius: 10px;
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    margin: 0 12px;
+    width: calc(100% - 24px);
+  }
+}
+
+/* When a modal is open, dim and slightly desaturate the background content
+   and prevent scrolling. The portal backdrop already covers the viewport,
+   but this improves contrast and makes the dimming effect more consistent
+   when the modal is centered above the splash card. */
+body.modal-open {
+  overflow: hidden;
+}
+body.modal-open .splash-wrap,
+body.modal-open .main-content.splash-hero {
+  filter: brightness(0.6) saturate(0.92);
+  transition: filter 220ms ease;
+  pointer-events: none; /* avoid accidental interaction behind the modal */
+}
+
+/* A full-viewport dim layer so the entire page appears dimmed while the
+   modal is open. This sits below the modal backdrop (which has z-index:60)
+   but above the rest of the page content. Using pointer-events:none lets
+   the modal backdrop handle interactions while still visually dimming
+   everything underneath. */
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+/* Modal title sizing: make the H2 (What is this?) clearly larger than H3 subheadings */
+.splash-modal h2 {
+  font-size: clamp(22px, 3.6vw, 30px);
+  line-height: 1.05;
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+.splash-modal h3 {
+  font-size: 1.05rem;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Style the close button inside the modal so it matches theme-aware icon buttons */
+.splash-modal .btn-outline-secondary {
+  /* keep generic modal buttons reasonable, but the close button has its
+     own specific styling via .modal-close */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  color: var(--text);
+  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.splash-modal .btn-outline-secondary:hover,
+.splash-modal .btn-outline-secondary:focus {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+.splash-modal .btn-outline-secondary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
+  outline-offset: 2px;
+}
+
+/* Specific close button that visually matches other small icon controls */
+.splash-modal .modal-close {
+  /* keep the close button in the document flow (not absolute) so it
+     appears inline with the modal header and respects the header's
+     layout (flex with space-between). */
+  position: static;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: none !important;
+  color: var(--text);
+}
+.splash-modal .modal-close:hover,
+.splash-modal .modal-close:focus {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+.splash-modal .modal-close:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
+  outline-offset: 2px;
+}

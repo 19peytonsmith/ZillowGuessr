@@ -1,48 +1,18 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document === "undefined") return "light";
-    const attr = document.documentElement.getAttribute("data-theme");
-    return attr === "dark" || attr === "light" ? attr : "light";
-  });
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
-
-    // Cross-tab sync
-    const onStorage = (e: StorageEvent) => {
-      if (
-        e.key === "theme" &&
-        (e.newValue === "dark" || e.newValue === "light")
-      ) {
-        setTheme(e.newValue);
-        document.documentElement.setAttribute("data-theme", e.newValue);
-        document.cookie = `theme=${e.newValue};path=/;max-age=31536000`;
-      }
-    };
-    window.addEventListener("storage", onStorage);
-
-    return () => {
-      window.removeEventListener("storage", onStorage);
-    };
   }, []);
 
-  useEffect(() => {
-    // Persist whenever theme changes (user toggled or storage sync)
-    try {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-      document.cookie = `theme=${theme};path=/;max-age=31536000`;
-    } catch {}
-  }, [theme]);
-
   function toggle() {
-    setTheme((t) => (t === "light" ? "dark" : "light"));
+    setTheme(theme === "light" ? "dark" : "light");
   }
 
   return (

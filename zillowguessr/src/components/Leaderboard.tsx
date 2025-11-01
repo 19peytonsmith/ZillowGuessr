@@ -11,6 +11,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "./Confetti";
+import CardContent from "./CardContent";
 
 export default function Leaderboard() {
   type Entry = { score: number; playNumber: number; ts?: number | null };
@@ -403,14 +404,12 @@ export default function Leaderboard() {
         <LeaderboardLoadingSkeleton />
       ) : leaderboardScores.length > 0 ? (
         <>
-          <div className="leaderboard-card">
-            <h2>Your Total Scores</h2>
-            <hr className="leaderboard-divider" />
+          <CardContent title="Your Total Scores">
             <ul ref={listRef} className="leaderboard-list">
               {/** Display ordered by highest score, but show the original play number. */}
               {renderedItems}
             </ul>
-          </div>
+          </CardContent>
           <div className="leaderboard-actions" aria-hidden={false}>
             <button
               className="leaderboard-tryagain"

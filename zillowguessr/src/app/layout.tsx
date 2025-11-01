@@ -3,9 +3,11 @@ import { Lexend_Exa } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/app.css";
 import "../styles/skeleton.css";
+import "../styles/main.css";
 import HouseBackground from "@/components/HouseBackground";
-import Script from "next/dist/client/script";
-import { cookies } from "next/dist/server/request/cookies";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import { cn } from "@/lib/utils";
 
 const lexendExa = Lexend_Exa({
   variable: "--font-lexend-exa",
@@ -19,44 +21,32 @@ export const metadata: Metadata = {
   description: "The game where you guess the price of Zillow listings!",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const themeCookie = cookieStore.get("theme")?.value as
-    | "light"
-    | "dark"
-    | undefined;
-  const theme = themeCookie ?? "light";
-
   return (
-    <html lang="en" data-theme={theme}>
-      <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){
-             try{
-               var c = document.cookie.match(/(?:^|; )theme=([^;]+)/);
-               var t = c ? decodeURIComponent(c[1]) : null;
-               if(!t){
-                 var m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                 t = m ? 'dark' : 'light';
-               }
-               document.documentElement.setAttribute('data-theme', t);
-             }catch(e){}
-           })();`}
-        </Script>
-      </head>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${lexendExa.variable} antialiased relative`}>
-        <HouseBackground
-          zIndex={0}
-          minSize={10}
-          maxSize={1200}
-          minSpeed={8}
-          maxSpeed={50}
-        />
-        <main>{children}</main>
+        <ThemeProvider>
+          <AnimatedGridPattern
+            numSquares={30}
+            maxOpacity={0.1}
+            duration={3}
+            repeatDelay={1}
+            className={cn("fixed inset-0 -z-10 w-screen h-screen")}
+            style={{ position: "fixed" }}
+          />
+          <HouseBackground
+            zIndex={0}
+            minSize={10}
+            maxSize={1200}
+            minSpeed={8}
+            maxSpeed={50}
+          />
+          <main>{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
