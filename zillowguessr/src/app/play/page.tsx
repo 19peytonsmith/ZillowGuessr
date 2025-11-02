@@ -24,7 +24,7 @@ import { useTheme } from "next-themes";
 import "@/styles/app.css";
 import "@/styles/leaderboard.css";
 
-const ROUNDS = 1;
+const ROUNDS = Number(process.env.NUMBER_OF_ROUNDS) || 5;
 
 type PropertyInfo = {
   urls: string[];
