@@ -33,11 +33,14 @@ export default function Leaderboard() {
   const [mostRecentPlayNumber, setMostRecentPlayNumber] = useState<
     number | null
   >(null);
+  const [animationDuration, setAnimationDuration] = useState<number>(2);
   const animationDelayRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
   const loadStartRef = useRef<number | null>(null);
   const minLoadingRef = useRef<number | null>(null);
+
+  const [hasScrollbar, setHasScrollbar] = useState<boolean>(false);
 
   // Touch / tooltip handling: on touch devices we prefer click-to-toggle tooltips
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
@@ -135,6 +138,28 @@ export default function Leaderboard() {
     };
   }, []);
 
+  // Check if the list has a scrollbar
+  useEffect(() => {
+    if (!listRef.current) return;
+
+    const checkScrollbar = () => {
+      if (!listRef.current) return;
+      const hasScroll =
+        listRef.current.scrollHeight > listRef.current.clientHeight;
+      setHasScrollbar(hasScroll);
+    };
+
+    checkScrollbar();
+
+    // Recheck when window resizes or content changes
+    const resizeObserver = new ResizeObserver(checkScrollbar);
+    resizeObserver.observe(listRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [leaderboardScores, renderOrder]);
+
   // When leaderboardScores change, determine if we should animate the last entry
   useEffect(() => {
     if (!leaderboardScores || leaderboardScores.length === 0) return;
@@ -149,6 +174,15 @@ export default function Leaderboard() {
       const targetIndex = sorted.findIndex(
         (e) => e.playNumber === last.playNumber
       );
+
+      // Calculate dynamic duration based on distance
+      // Min 0.5s for nearby positions, max 3s for far positions
+      const totalItems = leaderboardScores.length;
+      const distanceFromBottom = totalItems - 1 - targetIndex;
+      const normalizedDistance =
+        distanceFromBottom / Math.max(totalItems - 1, 1);
+      const calculatedDuration = 0.5 + normalizedDistance * 1.5; // 0.5s to 2s range
+      setAnimationDuration(calculatedDuration);
 
       // Move newly-played entry to the bottom of the render order and hold there for 1s
       setRenderOrder((prev) => {
@@ -186,7 +220,7 @@ export default function Leaderboard() {
             setMostRecentPlayNumber(last.playNumber);
             landingTimeoutRef.current = null;
           }, 900);
-        }, 2000); // Match Framer Motion animation duration
+        }, calculatedDuration * 1000); // Use dynamic duration
 
         animationDelayRef.current = null;
       }, 1000); // 1000ms hold at bottom
@@ -245,7 +279,6 @@ export default function Leaderboard() {
     if (isAtBottom) return; // Don't scroll yet, wait for it to move
 
     // Item has moved to final position, track it during the animation
-    const animationDuration = 3000; // Match the 3s animation duration
     const delayBeforeTracking = 500; // Wait 0.5s before starting to center
     const startTime = Date.now();
     let rafId: number;
@@ -259,7 +292,7 @@ export default function Leaderboard() {
         return;
       }
 
-      const progress = Math.min(elapsed / animationDuration, 1);
+      const progress = Math.min(elapsed / (animationDuration * 1000), 1);
 
       const listRect = list.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
@@ -292,7 +325,7 @@ export default function Leaderboard() {
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [highlightedPlayNumber, renderOrder]);
+  }, [highlightedPlayNumber, renderOrder, animationDuration]);
 
   // Refs for animation
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -363,7 +396,7 @@ export default function Leaderboard() {
         transition={{
           layout: {
             type: "tween",
-            duration: 2,
+            duration: animationDuration,
             ease: [0.45, 0, 0.15, 1], // Stronger ease in, smooth ease out
           },
         }}
@@ -465,7 +498,9 @@ export default function Leaderboard() {
                   {/** Display ordered by highest score, but show the original play number. */}
                   {renderedItems}
                 </ul>
-                <ProgressiveBlur position="bottom" height="20%" />
+                {hasScrollbar && (
+                  <ProgressiveBlur position="bottom" height="20%" />
+                )}
               </div>
             </div>
           </Card>
