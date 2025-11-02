@@ -11,8 +11,18 @@ import Rounds from "@/components/Rounds";
 import Confetti from "@/components/Confetti";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBed, faBathtub, faRuler } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBed,
+  faBathtub,
+  faRuler,
+  faSpinner,
+  faHome,
+} from "@fortawesome/free-solid-svg-icons";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Particles } from "@/components/Particles";
+import { useTheme } from "next-themes";
+import "@/styles/app.css";
+import "@/styles/leaderboard.css";
 
 const ROUNDS = 1;
 
@@ -29,8 +39,17 @@ type PropertyInfo = {
 
 export default function PlayPage() {
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState<boolean>(false);
   const [showMap, setShowMap] = useState<boolean>(false);
   const DEFAULT_MAP_ZOOM = 8;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? resolvedTheme || theme : "light";
+  const particleColor = currentTheme === "dark" ? "#ffffff" : "#000000";
 
   const [propertyDataQueue, setPropertyDataQueue] = useState<PropertyInfo[]>(
     []
@@ -39,7 +58,7 @@ export default function PlayPage() {
   const [originalIndex, setOriginalIndex] = useState<number>(0);
   const [, setCarouselIndex] = useState<number>(0);
 
-  const [sliderValue, setSliderValue] = useState<number | number[]>(250);
+  const [sliderValue, setSliderValue] = useState<number | number[]>(350);
   const [sliderValues, setSliderValues] = useState<Array<number | undefined>>(
     []
   );
@@ -112,6 +131,9 @@ export default function PlayPage() {
   const [pendingNextRound, setPendingNextRound] = useState<boolean>(false);
   const [color, setColor] = useState<SliderProps["color"] | string>("primary");
   const [getResults, setGetResults] = useState<boolean>(false);
+  const [isLoadingResults, setIsLoadingResults] = useState<boolean>(false);
+  const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
+  const [isExiting, setIsExiting] = useState<boolean>(false);
 
   const currentData = useMemo(
     () => propertyDataQueue[currentIndex],
@@ -201,26 +223,25 @@ export default function PlayPage() {
 
   const convertValueToSliderValue = (moneyValue: number) => {
     if (moneyValue <= 100_000) {
-      return (moneyValue / 100_000) * 250;
+      return (moneyValue / 100_000) * 100;
     } else if (moneyValue <= 1_000_000) {
-      return (
-        250 + ((moneyValue - 100_000) / (1_000_000 - 100_000)) * (750 - 250)
-      );
+      return 100 + ((moneyValue - 100_000) / (1_000_000 - 100_000)) * 500;
+    } else if (moneyValue <= 5_000_000) {
+      return 600 + ((moneyValue - 1_000_000) / (5_000_000 - 1_000_000)) * 300;
     } else {
-      return (
-        750 +
-        ((moneyValue - 1_000_000) / (20_000_000 - 1_000_000)) * (1000 - 750)
-      );
+      return 900 + ((moneyValue - 5_000_000) / (20_000_000 - 5_000_000)) * 100;
     }
   };
 
   function calculateValue(v: number) {
-    if (v <= 250) {
-      return (v / 250) * 100_000;
-    } else if (v <= 750) {
-      return 100_000 + ((v - 250) / (750 - 250)) * (1_000_000 - 100_000);
+    if (v <= 100) {
+      return (v / 100) * 100_000;
+    } else if (v <= 600) {
+      return 100_000 + ((v - 100) / 500) * (1_000_000 - 100_000);
+    } else if (v <= 900) {
+      return 1_000_000 + ((v - 600) / 300) * (5_000_000 - 1_000_000);
     } else {
-      return 1_000_000 + ((v - 750) / (1000 - 750)) * (20_000_000 - 1_000_000);
+      return 5_000_000 + ((v - 900) / 100) * (20_000_000 - 5_000_000);
     }
   }
 
@@ -279,7 +300,7 @@ export default function PlayPage() {
     setRoundLocked(false);
     setPendingNextRound(false);
     setColor("primary");
-    setSliderValue(250);
+    setSliderValue(350);
     setCurrentIndex((i) => i + 1);
     setOriginalIndex(currentIndex + 1);
     setCarouselIndex(0);
@@ -297,17 +318,18 @@ export default function PlayPage() {
       setSliderValue(result);
     } else {
       const sv = sliderValues[round - 1];
-      setSliderValue(typeof sv === "number" ? sv : 250);
+      setSliderValue(typeof sv === "number" ? sv : 350);
     }
   };
 
   const handleBackToOriginalRound = () => {
     setCurrentIndex(originalIndex);
     setRoundLocked(false);
-    setSliderValue(250);
+    setSliderValue(350);
   };
 
   const handleGetResults = () => {
+    setIsLoadingResults(true);
     const stored = Cookies.get("leaderboardScores");
     const existingRaw = stored ? JSON.parse(stored) : [];
     const existing = Array.isArray(existingRaw)
@@ -329,26 +351,36 @@ export default function PlayPage() {
 
     Cookies.set("leaderboardScores", JSON.stringify(updated), { expires: 7 });
 
-    router.push("/leaderboards");
+    router.push("/leaderboards?fromPlay=true");
   };
 
   const buttonState = () => {
     if (getResults) {
       return (
-        <button className="btn btn-success" onClick={handleGetResults}>
+        <button
+          className="btn btn-success px-5 py-2"
+          onClick={handleGetResults}
+          disabled={isLoadingResults}
+        >
           <b>Get Results</b>
+          {isLoadingResults && (
+            <FontAwesomeIcon icon={faSpinner} spin className="ms-2" />
+          )}
         </button>
       );
     } else if (pendingNextRound) {
       return (
-        <button className="btn btn-primary" onClick={handleNextRoundClick}>
+        <button
+          className="btn btn-primary px-5 py-2"
+          onClick={handleNextRoundClick}
+        >
           <b>Next Round</b>
         </button>
       );
     } else if (roundLocked) {
       return (
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary px-5 py-2"
           onClick={handleBackToOriginalRound}
         >
           <b>Go back to Round {originalIndex + 1}</b>
@@ -366,18 +398,36 @@ export default function PlayPage() {
   };
 
   return (
-    <div className="mx-auto my-auto d-flex">
+    <div className="mx-auto my-auto flex">
       <Confetti active={showConfetti} duration={3000} />
       {currentData ? (
-        <div
-          className="main-content p-4 mx-auto position-relative"
-          style={{ backgroundColor: "var(--card-bg)" }}
-        >
-          <ThemeToggle />
-          <h1 className="my-0">{currentData.address}</h1>
-          <div className="d-flex justify-content-between">
+        <div className="main-content p-4 mx-auto relative bg-[var(--card-bg)]">
+          <Particles
+            className="absolute inset-0 -z-10"
+            quantity={50}
+            ease={80}
+            color={particleColor}
+            refresh
+          />
+          <div className="play-page-header flex justify-between items-center mb-1">
+            <h1 className="my-0">{currentData.address}</h1>
+            <div className="flex items-center gap-2">
+              <button
+                className="play-home-btn"
+                onClick={() => setShowExitConfirm(true)}
+                title="Go Home"
+              >
+                <span className="play-home-icon" aria-hidden>
+                  <FontAwesomeIcon icon={faHome} />
+                </span>
+                Home
+              </button>
+              <ThemeToggle />
+            </div>
+          </div>
+          <div className="property-info-row flex justify-between">
             <h4>{currentData.city_state_zipcode}</h4>
-            <div className="property-data d-flex gap-2">
+            <div className="property-data flex gap-2">
               <h5 className="text-end">
                 <FontAwesomeIcon icon={faBed} /> {currentData.beds}
                 <span className="small-text">bd</span>
@@ -396,13 +446,12 @@ export default function PlayPage() {
           </div>
 
           <hr />
-          <div className="d-flex align-items-center justify-content-between">
+          <div className="flex items-center justify-between">
             <h5>
               Score{" "}
-              <span className="score-inline d-block d-sm-inline">
+              <span className="inline-flex items-center relative d-block d-sm-inline">
                 <span
                   className={`score-number ${animatingScore ? "anim" : ""}`}
-                  style={{ color: "var(--price-actual)" }}
                 >
                   {displayTotal}
                 </span>
@@ -413,7 +462,7 @@ export default function PlayPage() {
               </span>
             </h5>
 
-            <div className="d-flex align-items-center gap-2 flex-column flex-sm-row">
+            <div className="flex items-center gap-2 flex-col sm:flex-row">
               {currentData.address ? (
                 <button
                   className="btn btn-outline-primary icon-link"
@@ -486,6 +535,7 @@ export default function PlayPage() {
             onChange={handlePropertySliderOnChange}
             disabled={roundLocked}
             color={color as SliderProps["color"]}
+            onSubmit={() => currentData && handleSubmit(currentData.value)}
           />
 
           <div className="round-div">
@@ -506,6 +556,40 @@ export default function PlayPage() {
         </div>
       ) : (
         <LoadingSkeleton />
+      )}
+
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div
+          className="exit-modal-backdrop"
+          onClick={() => setShowExitConfirm(false)}
+        >
+          <div className="exit-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Are you sure?</h3>
+            <p>All progress will be lost if you leave this page.</p>
+            <div className="exit-modal-actions">
+              <button
+                className="exit-modal-btn exit-cancel"
+                onClick={() => setShowExitConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="exit-modal-btn exit-confirm"
+                onClick={() => {
+                  setIsExiting(true);
+                  router.push("/");
+                }}
+                disabled={isExiting}
+              >
+                Leave
+                {isExiting && (
+                  <FontAwesomeIcon icon={faSpinner} spin className="ms-2" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

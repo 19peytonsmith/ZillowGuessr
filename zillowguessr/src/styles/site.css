@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* Theme variables */
+:root {
+  --bg: #ffffff;
+  --text: #0f1720;
+  --muted: #6b7280;
+  --card-bg: #f8fafc;
+  --accent: #16423c;
+  --shadow: rgba(2, 6, 23, 0.08);
+  --price-chosen: #1976d2;
+  --price-actual: #28a745;
+  --price-positive: #28a745;
+  --status: #000000;
+  --leaderboard-bg: #f0f0f0;
+  --skeleton-1: #e6e6e6;
+  --skeleton-2: #f2f2f2;
+  --skeleton-3: #e6e6e6;
+  --text-light: #e0e0e0;
+  --btn-primary: var(--accent);
+  --btn-success: var(--price-actual);
+  --btn-secondary: var(--muted);
+  --slider-mark: var(--muted);
+  --slider-mark-active: var(--accent);
+  --slider-mark-label: var(--muted);
+  --slider-track: var(--accent);
+  --slider-rail: var(--shadow);
+  --slider-thumb: var(--accent);
+  --tracking: -0.1em;
+}
+
+[data-theme="dark"] {
+  --bg: #08151a;
+  --text: #e6eef0;
+  --muted: #9ca3af;
+  --card-bg: #0b1220;
+  --accent: #2dd4bf;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --price-chosen: #1976d2;
+  --price-actual: #28a745;
+  --price-positive: #28a745;
+  --status: #e6eef0;
+  --leaderboard-bg: var(--card-bg);
+  --skeleton-1: #0f1720;
+  --skeleton-2: #0b1220;
+  --skeleton-3: #0f1720;
+  --text-light: #e0e0e0;
+  --btn-primary: var(--accent);
+  --btn-success: var(--price-actual);
+  --btn-secondary: var(--muted);
+}
+
+/* Base HTML/Body styles */
+body,
+html {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  background-color: var(--bg);
+  font-family:
+    var(--font-lexend-exa),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-y: scroll;
+  color: var(--text);
+  background: var(--bg) !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  font-family:
+    var(--font-lexend-exa),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text) !important;
+  letter-spacing: calc(var(--tracking, 0) * 1.1);
+}
+
+/* Global button and input typography */
+.btn,
+.btn *,
+.MuiButton-root,
+.MuiButton-root *,
+button,
+input[type="button"],
+input[type="submit"] {
+  letter-spacing: var(--tracking, 0) !important;
+  font-family: var(--font-lexend-exa) !important;
+}

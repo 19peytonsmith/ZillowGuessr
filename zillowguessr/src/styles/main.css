@@ -9,22 +9,43 @@
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.06);
   color: var(--text);
-  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
 }
 .theme-like:hover {
   transform: translateY(-2px);
 }
 
-/* Animated breathing gradient for the splash card. Kept at top-level so
-   it's valid CSS and applies correctly. */
+/* Animated breathing gradient for the splash card */
 .main-content.splash-hero {
-  position: relative; /* for the pseudo-element */
-  overflow: hidden; /* ensure the animated background is clipped to the card */
+  position: relative;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 60%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-/* Ensure the theme toggle participates in the splash header layout
-   (app.css makes .theme-toggle absolute by default). Use a specific
-   selector and !important so splash layout keeps the toggle inline. */
+/* Light-theme: make the animated gradient more visible */
+html:not([data-theme="dark"]) .main-content.splash-hero {
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 20%, transparent);
+}
+
+/* Ensure all interactive content is above background elements */
+.main-content.splash-hero
+  > div:not(.house-background):not(.particles-background),
+.main-content.splash-hero > .house-background ~ *:not(.particles-background) {
+  position: relative;
+  z-index: 10;
+}
+
+/* Particles background layer */
+.particles-background {
+  z-index: 1;
+}
+
+/* Ensure the theme toggle participates in the splash header layout */
 .main-content.splash-hero .theme-toggle {
   position: static !important;
   right: auto !important;
@@ -32,13 +53,25 @@
   margin: 0 !important;
 }
 
-/* Improve border contrast for the theme toggle and GitHub icon inside
-   the splash card by using the theme-aware text color for the border. This
-   ensures good visibility in dark mode as --text flips to a light color. */
+/* Improve border contrast for controls inside the splash card */
 .main-content.splash-hero .theme-toggle,
-.main-content.splash-hero .theme-like {
+.main-content.splash-hero .theme-like,
+.main-content.splash-hero .what-btn,
+.main-content.splash-hero .energy-btn,
+.main-content.splash-hero .btn-outline-secondary,
+.main-content.splash-hero .ghost-btn-accessible {
   border-color: color-mix(in srgb, var(--text) 14%, transparent) !important;
   background: transparent !important;
+}
+
+/* Slightly stronger border in dark theme to maintain contrast */
+html[data-theme="dark"] .main-content.splash-hero .theme-like,
+html[data-theme="dark"] .main-content.splash-hero .theme-toggle,
+html[data-theme="dark"] .main-content.splash-hero .what-btn,
+html[data-theme="dark"] .main-content.splash-hero .energy-btn,
+html[data-theme="dark"] .main-content.splash-hero .btn-outline-secondary,
+html[data-theme="dark"] .main-content.splash-hero .ghost-btn-accessible {
+  border-color: color-mix(in srgb, var(--text) 22%, transparent) !important;
 }
 
 /* Energy drink / tip button — small pill that matches the other controls */
@@ -52,7 +85,10 @@
   color: var(--text);
   text-decoration: none;
   font-weight: 600;
-  transition: color 160ms ease, transform 160ms ease, border-color 160ms ease;
+  transition:
+    color 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
   height: 40px; /* match theme-like / theme-toggle */
   line-height: 1;
 }
@@ -71,43 +107,33 @@
   transform: translateY(-2px);
 }
 
-/* Subtle lightning zap animation for the bolt icon on hover. Kept short
-   and muted so it's decorative and doesn't distract. Uses a slight
-   rotation/scale with a soft colored drop-shadow that matches the
-   primary accent. */
+/* Lightning bolt radiating glow animation on hover */
 .main-content.splash-hero .energy-btn svg {
   transform-origin: center;
-  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
-    filter 220ms ease;
+  transition: filter 150ms ease;
 }
 
-@keyframes bolt-zap {
+@keyframes bolt-radiate {
   0% {
-    transform: rotate(0) scale(1);
     filter: drop-shadow(0 0 0 transparent);
-    opacity: 1;
   }
-  25% {
-    transform: rotate(-6deg) scale(1.08);
-    filter: drop-shadow(
-      0 0 8px color-mix(in srgb, var(--btn-primary) 60%, transparent)
-    );
-  }
-  55% {
-    transform: rotate(6deg) scale(1.02);
-    filter: drop-shadow(
-      0 0 6px color-mix(in srgb, var(--btn-primary) 44%, transparent)
-    );
+  50% {
+    filter: drop-shadow(0 0 8px var(--btn-primary))
+      drop-shadow(0 0 12px var(--btn-primary))
+      drop-shadow(
+        0 0 16px color-mix(in srgb, var(--btn-primary) 40%, transparent)
+      );
   }
   100% {
-    transform: rotate(0) scale(1);
-    filter: drop-shadow(0 0 0 transparent);
-    opacity: 1;
+    filter: drop-shadow(0 0 4px var(--btn-primary))
+      drop-shadow(
+        0 0 8px color-mix(in srgb, var(--btn-primary) 60%, transparent)
+      );
   }
 }
 
 .main-content.splash-hero .energy-btn:hover svg {
-  animation: bolt-zap 420ms ease-out both;
+  animation: bolt-radiate 600ms ease-in-out forwards;
 }
 
 /* Make the energy button text smaller so the long label fits nicely */
@@ -126,18 +152,10 @@
   border-radius: 8px !important;
 }
 
-/* Make sure icons inside controls are vertically centered and consistent */
-.main-content.splash-hero .icon-link svg,
-.main-content.splash-hero .theme-toggle svg,
-.main-content.splash-hero .theme-like svg,
-.main-content.splash-hero .energy-btn svg {
-  vertical-align: middle;
-}
-
-/* Make the GitHub icon behave like the other header controls on hover: use
-   the primary/accent color and a small lift so interactions feel consistent. */
+/* Hover state for controls - theme toggle, GitHub icon, what button */
 .main-content.splash-hero .theme-like:hover,
-.main-content.splash-hero .theme-toggle:hover {
+.main-content.splash-hero .theme-toggle:hover,
+.main-content.splash-hero .what-btn:hover {
   color: var(--btn-primary) !important;
   transform: translateY(-2px);
   border-color: color-mix(
@@ -147,50 +165,52 @@
   ) !important;
 }
 
-/* Ensure icons inherit the color so the SVG changes color on hover. */
+/* Ensure icons inherit color for hover effects */
 .main-content.splash-hero .theme-like svg,
-.main-content.splash-hero .theme-toggle svg {
+.main-content.splash-hero .theme-toggle svg,
+.main-content.splash-hero .what-btn svg,
+.main-content.splash-hero .icon-link svg,
+.main-content.splash-hero .energy-btn svg {
   color: inherit;
   fill: currentColor;
+  vertical-align: middle;
 }
 
-/* Buttons in the splash: keep outline look but change text color on hover
-   rather than swapping to a filled background. This gives a cleaner
-   hover interaction for Contact Me and Leaderboards. */
+/* Buttons in the splash: outline look with hover effects */
 .main-content.splash-hero .btn-outline-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
   background: transparent !important;
-  /* Use the main text color for better contrast in the splash header */
   color: var(--text) !important;
   border-color: color-mix(in srgb, var(--text) 12%, transparent) !important;
 }
+
 .main-content.splash-hero .btn-outline-secondary:hover,
 .main-content.splash-hero .ghost-btn-accessible:hover {
-  background: transparent !important; /* keep outline look */
-  color: var(--btn-primary) !important; /* accent text on hover */
+  background: transparent !important;
+  color: var(--btn-primary) !important;
   transform: translateY(-2px);
 }
 
-/* Slightly strengthen the GitHub/icon border on dark theme specifically */
-html[data-theme="dark"] .main-content.splash-hero .theme-like,
-html[data-theme="dark"] .main-content.splash-hero .theme-toggle {
-  border-color: color-mix(in srgb, var(--text) 22%, transparent) !important;
-}
-
+/* Animated gradient background pseudo-element */
 .main-content.splash-hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 0; /* place behind card content but above the element background */
+  z-index: 0;
   border-radius: inherit;
-  /* layered background: main gradient + a tiny subtle grain layer to
-     break up banding. Increasing background-size and using a blend mode
-     reduces visible stepping while keeping the soft look. */
-  background-image: linear-gradient(
-      120deg,
-      rgba(164, 243, 208, 0.12) 0%,
-      rgba(132, 255, 193, 0.08) 28%,
-      rgba(134, 239, 172, 0.06) 62%,
-      rgba(255, 255, 255, 0.02) 100%
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(30, 41, 59, 0.15) 0%,
+      rgba(51, 65, 85, 0.12) 20%,
+      rgba(71, 85, 105, 0.1) 40%,
+      rgba(100, 116, 139, 0.08) 60%,
+      rgba(148, 163, 184, 0.06) 80%,
+      rgba(203, 213, 225, 0.04) 100%
     ),
     repeating-linear-gradient(
       45deg,
@@ -198,55 +218,99 @@ html[data-theme="dark"] .main-content.splash-hero .theme-toggle {
       rgba(255, 255, 255, 0.005) 1px,
       transparent 2px
     );
-  /* static subtle gradient: full-size background, small grain overlay */
-  background-size: 100% 100%, 100% 100%;
+  background-size:
+    100% 100%,
+    100% 100%;
   background-repeat: no-repeat, repeat;
   background-blend-mode: overlay, normal;
-  filter: blur(6px) saturate(115%);
+  filter: blur(8px) saturate(110%);
   opacity: 0.95;
-  transition: opacity 600ms ease, filter 600ms ease;
+  transition:
+    opacity 600ms ease,
+    filter 600ms ease;
 }
 
-/* Subtle animation for the title to give a bit of life without being
-   distracting: slow, smooth vertical float with a gentle shadow pulse.
-   Use more keyframes and a slightly longer duration for fluid motion. */
+/* Light theme gradient override */
+html:not([data-theme="dark"]) .main-content.splash-hero::before {
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(245, 245, 245, 0.35) 0%,
+      rgba(250, 250, 250, 0.28) 25%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(248, 248, 248, 0.18) 75%,
+      rgba(240, 240, 240, 0.12) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      transparent 2px
+    );
+  opacity: 1;
+}
+
+/* Subtle animation for the title */
 .splash-title {
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  margin: 64px 0 12px 0;
+  padding: 12px 24px;
+  will-change: transform, text-shadow;
+  backface-visibility: hidden;
   animation: title-subtle 8s cubic-bezier(0.22, 0.9, 0.35, 1) infinite;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 3px 12px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes title-subtle {
   0% {
     transform: translateY(0);
-    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
   }
   20% {
-    transform: translateY(-1.2px);
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.028);
+    transform: translateY(-4px);
+    text-shadow:
+      0 1.5px 5px rgba(0, 0, 0, 0.35),
+      0 2.5px 10px rgba(0, 0, 0, 0.25),
+      0 3.5px 14px rgba(0, 0, 0, 0.15);
   }
   40% {
-    transform: translateY(0.6px);
-    text-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+    transform: translateY(2px);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
   }
   60% {
-    transform: translateY(-0.5px);
-    text-shadow: 0 5px 12px rgba(0, 0, 0, 0.024);
+    transform: translateY(-2px);
+    text-shadow:
+      0 1.2px 4.5px rgba(0, 0, 0, 0.32),
+      0 2.2px 9px rgba(0, 0, 0, 0.22),
+      0 3.2px 13px rgba(0, 0, 0, 0.12);
   }
   80% {
-    transform: translateY(0.2px);
-    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.018);
+    transform: translateY(1px);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
   }
   100% {
     transform: translateY(0);
-    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
   }
-}
-
-/* Ensure the splash card's immediate children render above the animated
-   background pseudo-element. This keeps the animation visible but the
-   UI elements interactable and crisp. */
-.main-content.splash-hero > * {
-  position: relative;
-  z-index: 1;
 }
 
 @keyframes ripple-swipe {
@@ -273,82 +337,74 @@ html[data-theme="dark"] .main-content.splash-hero .theme-toggle {
   }
 }
 
-.splash-hero {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 920px;
-}
-
-/* Make the splash hero visually match leaderboard cards: use the same
-   translucent card background, blur/backdrop filter, border and subtle
-   shadow so the UI feels consistent. The card padding is provided by
-   the page markup (p-5), so we avoid overriding it here. */
-.main-content.splash-hero {
-  background-color: var(--leaderboard-bg);
-  /* Slight transparent mix when supported for a softer card look */
-  background-color: color-mix(in srgb, var(--leaderboard-bg) 85%, transparent);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-/* Light-theme tweaks: make the animated gradient more visible in light
-   mode by slightly reducing the card's solid overlay and increasing the
-   pseudo-element opacity / stop alpha values. We target html:not([data-theme="dark"]) so
-   the dark theme keeps the previous, more subtle look. */
-html:not([data-theme="dark"]) .main-content.splash-hero {
-  /* reduce the card's opaque mix so the gradient shows through more */
-  background-color: color-mix(in srgb, var(--leaderboard-bg) 72%, transparent);
-}
-
-html:not([data-theme="dark"]) .main-content.splash-hero::before {
-  background-image: linear-gradient(
-      120deg,
-      rgba(164, 243, 208, 0.18) 0%,
-      rgba(132, 255, 193, 0.12) 28%,
-      rgba(134, 239, 172, 0.1) 62%,
-      rgba(255, 255, 255, 0.04) 100%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.006) 0px,
-      rgba(255, 255, 255, 0.006) 1px,
-      transparent 2px
-    );
-  opacity: 1;
-}
-.splash-title {
-  font-size: clamp(32px, 6vw, 64px);
-  font-weight: 700;
-  line-height: 1;
-  position: relative;
-  margin: 0 0 12px 0;
-  padding: 12px 24px;
-  will-change: transform, text-shadow;
-  backface-visibility: hidden;
-}
-.splash-title .subtle-mark {
+/* House background image */
+.house-background {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -30%);
-  font-size: 220px;
-  color: currentColor;
-  opacity: 0.06;
+  top: 0;
+  transform: translateX(-50%);
   pointer-events: none;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  z-index: 0;
+  width: 100%;
+  max-width: 1000px;
+  padding-bottom: 100%;
+  height: 0;
+  opacity: 0.8;
+  background-image: url("/assets/HouseHomePage.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top center;
+  box-shadow:
+    inset 0 60px 80px -20px rgba(0, 0, 0, 0.3),
+    inset 0 -60px 80px -20px rgba(0, 0, 0, 0.3);
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 60%,
+      rgba(0, 0, 0, 0.7) 80%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    radial-gradient(
+      ellipse 50% 100% at center,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.7) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.15) 85%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 60%,
+      rgba(0, 0, 0, 0.7) 80%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    radial-gradient(
+      ellipse 50% 100% at center,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.7) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.15) 85%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  mask-composite: intersect;
 }
 
+/* Splash lead text */
 .splash-lead {
   font-size: 1.125rem;
   margin-bottom: 20px;
+  text-shadow:
+    0 1px 6px rgba(0, 0, 0, 0.4),
+    0 2px 12px rgba(0, 0, 0, 0.3),
+    0 3px 18px rgba(0, 0, 0, 0.2);
 }
 
 .splash-cta {
   display: flex;
-  gap: 12px;
   justify-content: center;
   align-items: center;
   margin-bottom: 18px;
@@ -356,8 +412,7 @@ html:not([data-theme="dark"]) .main-content.splash-hero::before {
   flex-direction: column;
 }
 
-/* Improve splash title layout on small screens: center, take more width,
-   and reduce the subtle-mark so it doesn't push the title off-center. */
+/* Improve splash title layout on small screens */
 @media (max-width: 768px) {
   .splash-title {
     font-size: clamp(32px, 10vw, 60px);
@@ -366,118 +421,30 @@ html:not([data-theme="dark"]) .main-content.splash-hero::before {
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 10px;
+    margin-top: 0;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 2px 6px rgba(0, 0, 0, 0.15),
+      0 3px 9px rgba(0, 0, 0, 0.1) !important;
   }
 
-  .splash-title .subtle-mark {
-    font-size: 120px;
-    left: 50%;
-    top: 60%;
-    transform: translate(-50%, -50%);
-    opacity: 0.04;
-  }
-
-  /* Give the lead paragraph more breathing room on narrow screens */
   .splash-lead {
     padding: 0 8px;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      0 3px 9px rgba(0, 0, 0, 0.15) !important;
   }
-}
 
-/* Prominent Play button */
-.play-btn {
-  --btn-h: 72px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--btn-h);
-  /* increased horizontal padding for a more prominent CTA */
-  padding: 0 56px;
-  font-size: 1.6rem;
-  border-radius: 14px;
-  background: linear-gradient(
-    90deg,
-    var(--btn-primary),
-    color-mix(in srgb, var(--btn-primary) 70%, black 15%)
-  );
-  color: var(--bg) !important;
-  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
-  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1), box-shadow 220ms;
-  position: relative;
-  overflow: visible;
-  text-decoration: none !important;
-}
-.play-btn:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
-}
-.play-btn .play-text {
-  display: inline-flex;
-  align-items: center;
-  overflow: visible;
-}
-.play-letter {
-  display: inline-block;
-  transform-origin: center;
-}
-.play-btn:hover .play-letter {
-  animation: play-letter-bounce 720ms cubic-bezier(0.22, 0.9, 0.35, 1);
-}
-@keyframes play-letter-bounce {
-  0% {
-    transform: translateY(0);
+  .house-background {
+    width: 200%;
+    max-width: 2000px;
   }
-  20% {
-    transform: translateY(-8px);
+
+  .splash-cta {
+    gap: 12px;
   }
-  40% {
-    transform: translateY(0);
-  }
-  60% {
-    transform: translateY(-4px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
 
-/* Stagger delays for each letter — we'll set --i inline */
-.play-letter {
-  animation-delay: calc(var(--i, 0) * 60ms);
-}
-
-.play-btn:active {
-  transform: translateY(-2px) scale(0.995);
-}
-
-.splash-cta .play-btn {
-  margin-bottom: 12px;
-}
-
-.ghost-btn-accessible {
-  /* outlined but higher contrast text for accessibility */
-  color: color-mix(in srgb, var(--text) 90%, black 0%) !important;
-  border-color: color-mix(in srgb, var(--text) 60%, black 0%) !important;
-}
-
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 18px;
-}
-.byline {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.icon-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Responsive: stack byline and links on small screens and center them */
-@media (max-width: 640px) {
   .main-content.splash-hero .meta-row {
     flex-direction: column;
     align-items: center;
@@ -498,17 +465,137 @@ html:not([data-theme="dark"]) .main-content.splash-hero::before {
   }
 }
 
-.what-btn {
+/* Prominent Play button */
+.play-btn {
+  --btn-h: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--btn-h);
+  padding: 0 96px;
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--btn-primary),
+    color-mix(in srgb, var(--btn-primary) 70%, black 15%)
+  );
+  color: var(--bg) !important;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    box-shadow 220ms;
+  position: relative;
+  overflow: visible;
+  text-decoration: none !important;
+}
+
+.play-btn:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
+}
+
+.play-btn:active {
+  transform: translateY(-2px) scale(0.995);
+}
+
+.play-btn.loading {
+  animation: play-loading-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+.play-btn.loading .play-letter {
+  animation: play-loading-wave 1.2s ease-in-out infinite !important;
+}
+
+@keyframes play-loading-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 18px 50px rgba(2, 6, 23, 0.25);
+  }
+}
+
+@keyframes play-loading-wave {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-4px) scale(1.1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(4px) scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.play-btn .play-text {
+  display: inline-flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.play-letter {
+  display: inline-block;
+  transform-origin: center;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+.play-btn:hover .play-letter {
+  animation: play-letter-bounce 720ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+
+@keyframes play-letter-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-8px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Meta row */
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.byline {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.icon-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Make the small question button match theme-toggle sizing and behaviors */
+/* What button - small question icon */
 .main-content.splash-hero .what-btn {
   display: inline-flex;
   align-items: center;
@@ -520,29 +607,18 @@ html:not([data-theme="dark"]) .main-content.splash-hero::before {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
   color: var(--text);
-  transition: transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1), color 220ms,
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    color 220ms,
     border-color 220ms;
 }
 
 .main-content.splash-hero .what-btn svg {
   width: 18px;
   height: 18px;
-  color: inherit;
-  fill: currentColor;
 }
 
-.main-content.splash-hero .what-btn:hover {
-  color: var(--btn-primary);
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--btn-primary) 28%, transparent);
-}
-
-/* Slightly stronger border in dark theme to maintain contrast */
-html[data-theme="dark"] .main-content.splash-hero .what-btn {
-  border-color: color-mix(in srgb, var(--text) 22%, transparent);
-}
-
-/* Simple modal for the 'What is this' content */
+/* Modal styles */
 .splash-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -553,6 +629,7 @@ html[data-theme="dark"] .main-content.splash-hero .what-btn {
   z-index: 60;
   padding: 24px;
 }
+
 .splash-modal {
   background: var(--card-bg);
   color: var(--text);
@@ -563,9 +640,90 @@ html[data-theme="dark"] .main-content.splash-hero .what-btn {
   box-shadow: 0 8px 40px rgba(2, 6, 23, 0.25);
 }
 
-/* Mobile adjustments: ensure modal fits and close button is reachable
-   even when content is long. Make the modal itself scrollable and pin
-   it near the top of the viewport. */
+.splash-modal h2 {
+  font-size: clamp(22px, 3.6vw, 30px);
+  line-height: 1.05;
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.splash-modal h3 {
+  font-size: 1.05rem;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.splash-modal .btn-outline-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  color: var(--text);
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.splash-modal .btn-outline-secondary:hover,
+.splash-modal .btn-outline-secondary:focus {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+
+.splash-modal .btn-outline-secondary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
+  outline-offset: 2px;
+}
+
+.splash-modal .modal-close {
+  position: static;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: none !important;
+  color: var(--text);
+}
+
+/* Modal open state */
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open .splash-wrap,
+body.modal-open .main-content.splash-hero {
+  filter: brightness(0.6) saturate(0.92);
+  transition: filter 220ms ease;
+  pointer-events: none;
+}
+
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+/* Mobile modal adjustments */
 @media (max-width: 640px) {
   .splash-modal-backdrop {
     align-items: flex-start;
@@ -582,110 +740,4 @@ html[data-theme="dark"] .main-content.splash-hero .what-btn {
     margin: 0 12px;
     width: calc(100% - 24px);
   }
-}
-
-/* When a modal is open, dim and slightly desaturate the background content
-   and prevent scrolling. The portal backdrop already covers the viewport,
-   but this improves contrast and makes the dimming effect more consistent
-   when the modal is centered above the splash card. */
-body.modal-open {
-  overflow: hidden;
-}
-body.modal-open .splash-wrap,
-body.modal-open .main-content.splash-hero {
-  filter: brightness(0.6) saturate(0.92);
-  transition: filter 220ms ease;
-  pointer-events: none; /* avoid accidental interaction behind the modal */
-}
-
-/* A full-viewport dim layer so the entire page appears dimmed while the
-   modal is open. This sits below the modal backdrop (which has z-index:60)
-   but above the rest of the page content. Using pointer-events:none lets
-   the modal backdrop handle interactions while still visually dimming
-   everything underneath. */
-body.modal-open::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.45);
-  z-index: 50;
-  pointer-events: none;
-  transition: opacity 220ms ease;
-}
-
-/* Modal title sizing: make the H2 (What is this?) clearly larger than H3 subheadings */
-.splash-modal h2 {
-  font-size: clamp(22px, 3.6vw, 30px);
-  line-height: 1.05;
-  margin: 0;
-  font-weight: 800;
-  color: var(--text);
-}
-.splash-modal h3 {
-  font-size: 1.05rem;
-  margin-top: 18px;
-  margin-bottom: 8px;
-  color: var(--text);
-  font-weight: 700;
-}
-
-/* Style the close button inside the modal so it matches theme-aware icon buttons */
-.splash-modal .btn-outline-secondary {
-  /* keep generic modal buttons reasonable, but the close button has its
-     own specific styling via .modal-close */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-  color: var(--text);
-  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
-}
-.splash-modal .btn-outline-secondary:hover,
-.splash-modal .btn-outline-secondary:focus {
-  color: var(--btn-primary) !important;
-  transform: translateY(-2px);
-  border-color: color-mix(
-    in srgb,
-    var(--btn-primary) 28%,
-    transparent
-  ) !important;
-}
-.splash-modal .btn-outline-secondary:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
-  outline-offset: 2px;
-}
-
-/* Specific close button that visually matches other small icon controls */
-.splash-modal .modal-close {
-  /* keep the close button in the document flow (not absolute) so it
-     appears inline with the modal header and respects the header's
-     layout (flex with space-between). */
-  position: static;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-  background: none !important;
-  color: var(--text);
-}
-.splash-modal .modal-close:hover,
-.splash-modal .modal-close:focus {
-  color: var(--btn-primary) !important;
-  transform: translateY(-2px);
-  border-color: color-mix(
-    in srgb,
-    var(--btn-primary) 28%,
-    transparent
-  ) !important;
-}
-.splash-modal .modal-close:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
-  outline-offset: 2px;
 }

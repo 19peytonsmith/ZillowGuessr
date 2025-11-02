@@ -1,4 +1,7 @@
-/* Contact Me page styles */
+/* =================
+   CONTACT PAGE
+   ================= */
+
 .contact-container {
   display: flex;
   flex-direction: column;
@@ -8,31 +11,22 @@
   padding: 16px;
 }
 
-.contact-header {
-  width: 100%;
+.contact-container > div:has(.contact-card) {
   max-width: 400px;
-  text-align: center;
-  margin-bottom: 12px;
+  width: 100%;
 }
 
-.contact-header .theme-toggle {
-  margin-left: 8px;
+@media (max-width: 768px) {
+  .contact-container > div:has(.contact-card) {
+    width: 95%;
+  }
 }
 
 .contact-card {
   padding: 20px;
-  max-width: 400px;
-  width: 90%;
-  margin: 0 16px;
-  background-color: var(--leaderboard-bg);
-  background-color: color-mix(in srgb, var(--leaderboard-bg) 85%, transparent);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
+  width: 100%;
   text-align: center;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--accent);
-  overflow: hidden;
 }
 
 .contact-divider {
@@ -44,7 +38,7 @@
 }
 
 .contact-description {
-  text-align: left;
+  text-align: center;
   color: var(--text);
   margin-bottom: 20px;
   font-size: 0.95rem;
@@ -71,7 +65,6 @@
   color: #dc3545;
 }
 
-/* Dark mode form inputs */
 .contact-input {
   background-color: var(--card-bg, #f8f9fa) !important;
   border-color: var(--accent) !important;
@@ -109,7 +102,6 @@
   text-align: left;
 }
 
-/* Submit button with send icon */
 .contact-submit {
   display: inline-flex;
   align-items: center;
@@ -157,7 +149,6 @@
   }
 }
 
-/* Invalid form submission animation */
 .contact-submit.invalid {
   animation: shake 500ms ease-in-out;
   background-color: #dc3545 !important;
@@ -188,8 +179,10 @@
   width: 100%;
   max-width: 400px;
   display: flex;
-  justify-content: center;
-  margin-top: 12px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  justify-content: space-between;
 }
 
 .contact-button {
@@ -222,8 +215,6 @@
 }
 
 .back-icon {
-  display: inline-block;
-  line-height: 1;
   will-change: transform;
   transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }

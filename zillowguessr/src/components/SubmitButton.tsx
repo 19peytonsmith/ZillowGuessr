@@ -10,7 +10,11 @@ interface SubmitButtonProps {
 
 export default function SubmitButton({ onClick, children }: SubmitButtonProps) {
   return (
-    <Button className="px-5" variant="contained" onClick={onClick}>
+    <Button
+      className="submit-go-btn px-5 py-2"
+      variant="contained"
+      onClick={onClick}
+    >
       <span className="btn-text">{children}</span>
     </Button>
   );

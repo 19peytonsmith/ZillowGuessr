@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faQuestion,
@@ -12,12 +13,23 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { Particles } from "@/components/ui/particles";
+import { Particles } from "@/components/Particles";
+import HouseSlideshow from "@/components/HouseSlideshow";
 
 export default function SplashPage() {
   const playText = "Play".split("");
   const [showWhat, setShowWhat] = useState(false);
+  const [isLoadingPlay, setIsLoadingPlay] = useState(false);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? resolvedTheme || theme : "light";
+  const color = currentTheme === "dark" ? "#ffffff" : "#000000";
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -41,34 +53,22 @@ export default function SplashPage() {
   }, [showWhat]);
 
   return (
-    <div className="splash-wrap position-relative overflow-hidden">
-      <div
-        className="position-absolute top-0 start-0 w-100 h-100"
-        aria-hidden
-        style={{ zIndex: 1, pointerEvents: "none" }}
-      >
+    <div className="splash-wrap overflow-hidden">
+      <div className="main-content splash-hero p-5 mx-auto relative text-center">
         <Particles
-          className="w-100 h-100"
+          className="particles-background absolute inset-0 w-full h-full pointer-events-none"
           quantity={100}
-          ease={60}
-          color="#888"
+          ease={80}
+          color={color}
           refresh
-          style={{ position: "absolute", inset: 0, zIndex: 1 }}
         />
-      </div>
-      <div
-        style={{ zIndex: 2 }}
-        className="main-content splash-hero p-5 mx-auto position-relative text-center"
-      >
-        <div
-          className="d-flex justify-content-between align-items-center"
-          style={{ gap: 8 }}
-        >
-          <div className="header-left d-flex align-items-center">
-            {/* left-aligned question button */}
+        <HouseSlideshow />
+
+        <div className="flex justify-between items-center gap-2 relative z-10">
+          <div className="header-left flex items-center">
             <button
               type="button"
-              className="what-btn"
+              className="what-btn backdrop-blur-xs"
               aria-haspopup="dialog"
               aria-expanded={showWhat}
               aria-controls="what-modal"
@@ -79,12 +79,13 @@ export default function SplashPage() {
             </button>
           </div>
 
-          <div className="header-right d-flex align-items-center gap-2">
-            <ThemeToggle />
-
+          <div className="header-right flex items-center gap-2">
+            <div className="backdrop-blur-xs">
+              <ThemeToggle />
+            </div>
             <Link
               href="/contact-me"
-              className="btn btn-outline-secondary"
+              className="btn btn-outline-secondary backdrop-blur-xs"
               aria-label="Contact me"
             >
               <FontAwesomeIcon icon={faEnvelope} />
@@ -93,31 +94,33 @@ export default function SplashPage() {
           </div>
         </div>
 
-        <h1 className="splash-title">
-          ZillowGuessr
-          <span className="subtle-mark" aria-hidden>
-            ?
-          </span>
-        </h1>
+        <div className="relative z-10">
+          <h1 className="splash-title">ZillowGuessr</h1>
+        </div>
 
-        <p className="splash-lead">
-          ZillowGuessr is a GeoGuessr-inspired game where you’re shown 5 random
-          homes — complete with photos and details — and your challenge is
-          simple: guess the price!
+        <p className="splash-lead relative z-10">
+          ZillowGuessr is a GeoGuessr-inspired game where you&apos;re shown 5
+          random homes — complete with photos and details — and your challenge
+          is simple: guess the price!
         </p>
 
-        <div className="splash-cta">
+        <div className="splash-cta relative z-10">
           <Link
             href="/play"
-            className="play-btn"
+            className={`play-btn backdrop-blur-xs ${isLoadingPlay ? "loading" : ""}`}
             aria-label="Play ZillowGuessr"
+            onClick={() => setIsLoadingPlay(true)}
           >
             <span className="play-text">
               {playText.map((ch, idx) => (
                 <span
                   key={idx}
                   className="play-letter"
-                  style={{ animationDelay: `${idx * 60}ms` }}
+                  style={{
+                    animationDelay: isLoadingPlay
+                      ? `${idx * 150}ms`
+                      : `${idx * 60}ms`,
+                  }}
                 >
                   {ch}
                 </span>
@@ -127,21 +130,21 @@ export default function SplashPage() {
 
           <Link
             href="/leaderboards"
-            className="btn btn-lg btn-outline-secondary ghost-btn-accessible"
+            className="backdrop-blur-xs btn btn-lg btn-outline-secondary ghost-btn-accessible"
           >
             Leaderboards
           </Link>
         </div>
 
-        <hr />
+        <hr className="relative z-10" />
 
-        <div className="meta-row">
+        <div className="meta-row relative z-10">
           <div className="byline" aria-label="Author">
             By Peyton Smith
           </div>
-          <div className="links d-flex gap-2 align-items-center">
+          <div className="links flex gap-2 items-center">
             <a
-              className="icon-link theme-like"
+              className="icon-link theme-like backdrop-blur-xs"
               href="https://github.com/19peytonsmith/zillowguessr-v2"
               target="_blank"
               rel="noreferrer noopener"
@@ -151,9 +154,8 @@ export default function SplashPage() {
               <span className="visually-hidden">GitHub</span>
             </a>
 
-            {/* Buy-me-an-energy-drink button — placeholder link to BuyMeACoffee profile */}
             <a
-              className="energy-btn"
+              className="energy-btn backdrop-blur-xs"
               href="https://www.buymeacoffee.com/19peytonsmith"
               target="_blank"
               rel="noreferrer noopener"
@@ -184,19 +186,12 @@ export default function SplashPage() {
                 aria-modal="true"
                 aria-labelledby="what-modal-title"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
+                <div className="flex justify-between items-center gap-3">
                   <h2 id="what-modal-title">What is this?</h2>
                   <div>
                     <button
                       ref={closeBtnRef}
-                      className="btn btn-outline-secondary modal-close"
+                      className="btn btn-outline-secondary modal-close backdrop-blur-xs"
                       onClick={() => setShowWhat(false)}
                       aria-label="Close dialog"
                     >
@@ -206,7 +201,7 @@ export default function SplashPage() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12 }}>
+                <div className="mt-3">
                   <p>
                     ZillowGuessr is a small, educational project that shows a
                     set of publicly listed homes and asks players to guess their

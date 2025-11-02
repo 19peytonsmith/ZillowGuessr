@@ -1,37 +1,229 @@
-body,
-html {
-  position: relative;
-  padding: 0;
-  margin: 0;
-  /* Use CSS variables so theme can be toggled */
-  background-color: var(--bg);
-  /* Use the Lexend Exa variable (from next/font) with sensible fallbacks */
-  font-family: var(--font-lexend-exa), system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* =================
+   PLAY PAGE
+   ================= */
+
+/* Play page header responsive layout */
+@media (max-width: 768px) {
+  .play-page-header {
+    flex-direction: column-reverse !important;
+    align-items: flex-start !important;
+  }
+
+  .play-page-header h1 {
+    width: 100%;
+  }
+
+  .play-page-header > div {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .property-info-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .property-info-row .property-data {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .precise-input-container {
+    justify-content: stretch !important;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .precise-input {
+    flex: 1;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  /* Make slider labels smaller on small screens */
+  .MuiSlider-root .MuiSlider-markLabel {
+    font-size: 0.625rem !important;
+  }
+
+  .MuiSlider-root .MuiSlider-valueLabel {
+    font-size: 0.7rem !important;
+  }
 }
 
-* {
-  box-sizing: border-box;
-}
-
-/* Score animation styles */
-.score-inline {
+/* Play page home button */
+.play-home-btn {
   display: inline-flex;
   align-items: center;
-  position: relative;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--btn-primary);
+  background: transparent;
+  color: var(--btn-primary);
+  font-weight: 400;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
 }
+
+.play-home-btn:hover {
+  background: var(--btn-primary);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.play-home-btn:focus {
+  outline: 2px solid color-mix(in srgb, var(--btn-primary) 50%, transparent);
+  outline-offset: 2px;
+}
+
+.play-home-icon {
+  will-change: transform;
+}
+
+.play-home-btn:hover .play-home-icon {
+  animation: bounce-icon 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) 1 both;
+}
+
+@keyframes bounce-icon {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-1.5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Submit "Go!" button text bounce animation on hover */
+.submit-go-btn .btn-text {
+  display: inline-block;
+  will-change: transform;
+}
+
+.submit-go-btn:hover .btn-text {
+  animation: bounce-icon 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) 1 both;
+}
+
+/* =================
+   MODALS
+   ================= */
+
+/* Exit confirmation modal */
+.exit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fade-in 200ms ease;
+}
+
+.exit-modal {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slide-up 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.exit-modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.exit-modal p {
+  margin: 0 0 24px 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.exit-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.exit-modal-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease;
+}
+
+.exit-modal-btn:hover {
+  transform: translateY(-2px);
+}
+
+.exit-modal-btn:active {
+  transform: translateY(0);
+}
+
+.exit-cancel {
+  background: transparent;
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+
+.exit-cancel:hover {
+  background: var(--muted);
+  color: var(--bg);
+}
+
+.exit-confirm {
+  background: var(--btn-primary);
+  color: #fff;
+}
+
+html[data-theme="dark"] .exit-confirm {
+  color: #1a1a1a;
+}
+
+.exit-confirm:hover {
+  background: color-mix(in srgb, var(--btn-primary) 85%, black);
+  color: var(--bg);
+}
+
+.exit-confirm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =================
+   SCORE & ANIMATIONS
+   ================= */
+
 .score-number {
   font-variant-numeric: tabular-nums;
   transition: color 240ms ease;
   color: var(--price-actual);
 }
+
 .score-number.anim {
-  /* use the positive/text-success color while animating so it matches final state */
   color: var(--price-positive, #28a745) !important;
 }
+
 .score-delta {
   margin-left: 6px;
   color: var(--price-positive, #28a745);
@@ -39,12 +231,16 @@ html {
   position: relative;
   opacity: 0;
   transform: translateY(0);
-  transition: transform 600ms ease, opacity 600ms ease;
+  transition:
+    transform 600ms ease,
+    opacity 600ms ease;
 }
+
 .score-delta.show {
   opacity: 1;
   animation: delta-move 600ms ease forwards;
 }
+
 @keyframes delta-move {
   0% {
     opacity: 1;
@@ -56,7 +252,6 @@ html {
   }
 }
 
-/* small muted max-score text shown next to the main score */
 .score-max {
   font-size: 0.78rem;
   color: var(--muted);
@@ -64,159 +259,57 @@ html {
   align-self: self-end;
 }
 
-/* Theme variables: default to light theme. Toggle by setting
-   `data-theme="dark"` on the <html> element. */
-:root {
-  /* Core */
-  --bg: #ffffff;
-  --text: #0f1720; /* primary text */
-  --muted: #6b7280; /* secondary text */
-  --card-bg: #f8fafc;
-  --accent: #16423c; /* preserved accent color */
-  --shadow: rgba(2, 6, 23, 0.08);
-  /* Semantic colors used in components */
-  --price-chosen: #1976d2;
-  --price-actual: #28a745;
-  --status: #000000;
-  --leaderboard-bg: #f0f0f0;
-  /* skeleton */
-  --skeleton-1: #e6e6e6;
-  --skeleton-2: #f2f2f2;
-  --skeleton-3: #e6e6e6;
-  --text-light: #e0e0e0; /* use where a lighter text is explicitly desired */
-  /* Button tokens */
-  --btn-primary: var(--accent);
-  --btn-success: var(--price-actual);
-  --btn-secondary: var(--muted);
-  /* Slider tokens */
-  --slider-mark: var(--muted);
-  --slider-mark-active: var(--accent);
-  --slider-mark-label: var(--muted);
-  --slider-track: var(--accent);
-  --slider-rail: var(--shadow);
-  --slider-thumb: var(--accent);
-  /* Global letter-spacing (tracking). Negative values tighten the font when it's too loose. */
-  --tracking: -0.1em;
-}
+/* =================
+   MUI SLIDER OVERRIDES
+   ================= */
 
-[data-theme="dark"] {
-  --bg: #08151a; /* dark teal/near-black */
-  --text: #e6eef0;
-  --muted: #9ca3af;
-  --card-bg: #0b1220;
-  --accent: #2dd4bf;
-  --shadow: rgba(0, 0, 0, 0.5);
-  /* keep chosen/actual colors but adapt status/leaderboard to dark background */
-  --price-chosen: #1976d2;
-  --price-actual: #28a745;
-  --status: #e6eef0;
-  --leaderboard-bg: var(--card-bg);
-  --skeleton-1: #0f1720;
-  --skeleton-2: #0b1220;
-  --skeleton-3: #0f1720;
-  --text-light: #e0e0e0;
-  --btn-primary: var(--accent);
-  --btn-success: var(--price-actual);
-  --btn-secondary: var(--muted);
-}
-
-body {
-  overflow-y: scroll;
-}
-
-/* Basic color utilities using variables */
-body {
-  color: var(--text);
-  background: var(--bg) !important;
-}
-
-/* Ensure headings follow the theme color (override library defaults if necessary) */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--text) !important;
-  /* I prefer tighter letter-spacing for headings */
-  letter-spacing: calc(var(--tracking) * 1.1);
-}
-
-.fixed-size {
-  aspect-ratio: 19 / 6;
-}
-
-.property-carousel {
-  width: 960px;
-  max-width: 100%;
-  height: auto;
-}
-
-#root {
-  height: 100%;
-}
-
-.light-text {
-  color: var(--text-light);
-}
-
-.fill-black {
-  background-color: black !important;
-}
-
-.small-text {
-  font-size: 0.8rem;
-}
-
-.main-content {
-  z-index: 10;
-  width: 100%;
-  max-width: 1000px;
-  min-height: 100vh;
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--card-bg) 40%, black 20%);
-}
-
-.MuiSlider-thumb {
-  transition: all 1s ease-in-out;
-}
-
-/* Material UI Slider overrides to ensure good contrast in both themes */
-.MuiSlider-root {
-  --_slider-mark: var(--slider-mark);
-}
 .MuiSlider-root .MuiSlider-mark {
   width: 2px;
   height: 8px;
   border-radius: 1px;
   background-color: var(--slider-mark) !important;
 }
+
 .MuiSlider-root .MuiSlider-mark.MuiSlider-markActive {
   background-color: var(--slider-mark-active) !important;
 }
+
 .MuiSlider-root .MuiSlider-markLabel {
   color: var(--slider-mark-label) !important;
   font-family: var(--font-lexend-exa);
 }
+
 .MuiSlider-root .MuiSlider-rail {
   background-color: var(--slider-rail) !important;
   opacity: 1 !important;
 }
+
 .MuiSlider-root .MuiSlider-track {
   background-color: var(--slider-track) !important;
 }
+
 .MuiSlider-root .MuiSlider-thumb {
   background-color: var(--slider-thumb) !important;
   color: var(--slider-thumb) !important;
   box-shadow: 0 2px 6px var(--shadow);
   border: 2px solid var(--bg);
+  transition: none;
 }
+
 .MuiSlider-root .MuiSlider-valueLabel {
   color: var(--bg) !important;
   background: var(--text) !important;
   font-family: var(--font-lexend-exa);
 }
 
-/* Subtle bounce + settle used by PriceIndicators when shown after a guess */
+/* =================
+   PRICE INDICATORS
+   ================= */
+
+.price-indicator-animate {
+  animation: subtle-bounce-settle 520ms cubic-bezier(0.22, 0.9, 0.35, 1) both;
+}
+
 @keyframes subtle-bounce-settle {
   0% {
     transform: translateY(-10px) scaleY(0.995);
@@ -234,10 +327,6 @@ h6 {
   }
 }
 
-.price-indicator-animate {
-  animation: subtle-bounce-settle 520ms cubic-bezier(0.22, 0.9, 0.35, 1) both;
-}
-
 .price-indicator-label {
   background: var(--card-bg);
   border: 1px solid var(--price-chosen);
@@ -248,7 +337,9 @@ h6 {
   font-weight: 600;
   box-shadow: 0 1px 3px var(--shadow);
   pointer-events: none;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   will-change: transform, opacity;
   white-space: nowrap;
 }
@@ -258,18 +349,22 @@ h6 {
   color: var(--price-actual);
 }
 
-/* Map slide down/up animation */
+/* =================
+   MAP EMBED
+   ================= */
+
 .map-embed-container {
   overflow: hidden;
   max-height: 0;
   transform: translateY(-6px);
   opacity: 0;
-  transition: transform 360ms cubic-bezier(0.22, 0.9, 0.35, 1),
-    opacity 360ms cubic-bezier(0.22, 0.9, 0.35, 1), max-height 360ms ease;
+  transition:
+    transform 360ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    opacity 360ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    max-height 360ms ease;
 }
 
 .map-embed-container.map-visible {
-  /* Allow up to 400px map height when visible; adjust as needed */
   max-height: 420px;
   transform: translateY(0);
   opacity: 1;
@@ -282,118 +377,16 @@ h6 {
   box-shadow: 0 4px 14px var(--shadow);
 }
 
-/* Theme toggle button (lightweight) */
-.theme-toggle {
-  position: absolute;
-  right: 18px;
-  top: 18px;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
-  color: var(--text);
-}
-.theme-toggle:hover {
-  transform: translateY(-2px);
-}
-.theme-toggle:active {
-  transform: translateY(0);
-}
-.theme-toggle svg {
-  width: 20px;
-  height: 20px;
-  display: block;
+/* =================
+   INPUT STYLES
+   ================= */
+
+.precise-input::placeholder {
+  font-size: 0.75rem;
 }
 
-/* Make bootstrap outline buttons and small helpers follow theme variables where used */
-.btn-outline-primary {
-  color: var(--btn-primary) !important;
-  border-color: var(--btn-primary) !important;
-}
-.btn-outline-primary:hover,
-.btn-outline-primary:focus {
-  background-color: var(--btn-primary) !important;
-  color: var(--bg) !important;
-}
-.btn-outline-success {
-  color: var(--btn-success) !important;
-  border-color: var(--btn-success) !important;
-}
-.btn-outline-success:hover,
-.btn-outline-success:focus {
-  background-color: var(--btn-success) !important;
-  color: var(--bg) !important;
-}
-.btn-outline-secondary {
-  color: var(--btn-secondary) !important;
-  border-color: var(--btn-secondary) !important;
-}
-.btn-text {
-  /* ensure inline button text uses inherited tracking unless overridden */
-  letter-spacing: inherit;
-}
-
-/* Ensure Bootstrap and MUI buttons pick up the global tracking variable.
-   Some component libraries inject their own letter-spacing; use a specific
-   selector and !important to ensure consistent tracking across buttons. */
-.btn,
-.btn *,
-.MuiButton-root,
-.MuiButton-root *,
-button,
-input[type="button"],
-input[type="submit"] {
-  letter-spacing: var(--tracking, 0) !important;
-  font-family: var(--font-lexend-exa) !important;
-}
-.text-success {
-  color: var(--btn-success) !important;
-}
-.icon-link svg {
-  /* ensure icons pick up button/text color */
-  fill: currentColor;
-  stroke: currentColor;
-}
-
-/* Button text bounce on hover */
-@keyframes text-bounce {
-  0% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-4px);
-  }
-  50% {
-    transform: translateY(0);
-  }
-  70% {
-    transform: translateY(-2px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-.btn-text {
-  display: inline-block;
-  will-change: transform;
-}
-
-.MuiButton-root:hover .btn-text {
-  animation: text-bounce 1000ms cubic-bezier(0.22, 0.9, 0.35, 1);
-}
-
-/* Prevent theme-toggle overlap on small screens by giving the page title a
-   small top margin and extra right padding so the absolute-positioned toggle
-   doesn't sit on top of the h1 text. */
-@media (max-width: 640px) {
-  .main-content h1 {
-    margin-top: 22px !important;
-    padding-right: 64px; /* leave room for the 40x40 toggle + some gutter */
-  }
+.precise-input.over-limit {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+  animation: input-shake 0.4s ease-in-out;
 }

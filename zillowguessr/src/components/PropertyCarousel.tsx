@@ -6,6 +6,7 @@ import { Carousel, Status } from "react-responsive-3d-carousel";
 import "react-responsive-3d-carousel/dist/styles.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
+import { BlurFade } from "@/components/BlurFade";
 
 export default function PropertyCarousel({
   urls,
@@ -15,26 +16,70 @@ export default function PropertyCarousel({
   onChangeIndex?: (i: number) => void;
 }) {
   const [curIndex, setCurIndex] = React.useState(0);
+  const [visibleImagesLoaded, setVisibleImagesLoaded] = React.useState<
+    Set<string>
+  >(new Set());
+  const [allImagesLoaded, setAllImagesLoaded] = React.useState(false);
+
+  // Get the initially visible URLs (first 3 and last 2)
+  const visibleUrls = React.useMemo(() => {
+    if (urls.length <= 5) return urls;
+    return [
+      ...urls.slice(0, 3), // First 3
+      ...urls.slice(urls.length - 2), // Last 2
+    ];
+  }, [urls]);
+
+  // Reset when URLs change
+  React.useEffect(() => {
+    setVisibleImagesLoaded(new Set());
+    setAllImagesLoaded(false);
+  }, [urls]);
+
+  const handleVisibleImageLoad = React.useCallback((url: string) => {
+    setVisibleImagesLoaded((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(url);
+      return newSet;
+    });
+  }, []);
+
+  // Check if visible images are loaded
+  React.useEffect(() => {
+    if (
+      visibleImagesLoaded.size === visibleUrls.length &&
+      visibleUrls.length > 0
+    ) {
+      const allLoaded = visibleUrls.every((url) =>
+        visibleImagesLoaded.has(url)
+      );
+      if (allLoaded) {
+        setTimeout(() => setAllImagesLoaded(true), 100);
+      }
+    }
+  }, [visibleImagesLoaded, visibleUrls]);
 
   const items = React.useMemo(
     () =>
-      urls.map((url, idx) => (
-        <PhotoView key={idx} src={url}>
-          <Image
-            src={url}
-            alt={`Property image ${idx + 1}`}
-            width={800}
-            height={300}
-            style={{
-              width: "100%",
-              height: "300px",
-              objectFit: "cover",
-              display: "block",
-              cursor: "pointer",
-            }}
-          />
-        </PhotoView>
-      )),
+      urls.map((url, idx) => {
+        const isVisible = idx < 3 || idx >= urls.length - 2;
+
+        return (
+          <PhotoView key={idx} src={url}>
+            <div className="relative w-full h-[300px]">
+              <Image
+                src={url}
+                alt={`Property image ${idx + 1}`}
+                fill
+                sizes="800px"
+                priority={isVisible}
+                loading={isVisible ? "eager" : "lazy"}
+                className="object-cover cursor-pointer"
+              />
+            </div>
+          </PhotoView>
+        );
+      }),
     [urls]
   );
 
@@ -48,33 +93,62 @@ export default function PropertyCarousel({
 
   return (
     <PhotoProvider>
-      <Carousel
-        items={items}
-        startIndex={0}
-        height="auto"
-        containerHeight="300px"
-        autoPlay={false}
-        showIndicators={false}
-        showStatus={false}
-        showArrows
-        transformDuration={1000}
-        onChange={handleChange}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "0px",
-            right: "0px",
-            zIndex: 10,
-          }}
-        >
-          <Status
-            color="var(--status)"
-            length={items.length}
-            curIndex={curIndex}
+      {/* Preload only the 5 visible images (first 3 and last 2) */}
+      <div className="absolute left-[-9999px] top-[-9999px]">
+        {visibleUrls.map((url, idx) => (
+          <img
+            key={`preload-${idx}`}
+            src={url}
+            alt=""
+            onLoad={() => handleVisibleImageLoad(url)}
+            onError={() => handleVisibleImageLoad(url)}
           />
+        ))}
+      </div>
+
+      {/* Loading skeleton - shown while visible images are loading */}
+      {!allImagesLoaded && (
+        <div className="carousel-stack">
+          <div className="skeleton carousel-left-left" />
+          <div className="skeleton carousel-left" />
+          <div className="skeleton carousel-center" />
+          <div className="skeleton carousel-right" />
+          <div className="skeleton carousel-right-right" />
         </div>
-      </Carousel>
+      )}
+
+      {/* Show carousel once visible images are loaded */}
+      {allImagesLoaded && (
+        <BlurFade
+          delay={0}
+          inView={false}
+          duration={2}
+          blur="8px"
+          direction="up"
+          offset={12}
+        >
+          <Carousel
+            items={items}
+            startIndex={0}
+            height="auto"
+            containerHeight="300px"
+            autoPlay={false}
+            showIndicators={false}
+            showStatus={false}
+            showArrows
+            transformDuration={1000}
+            onChange={handleChange}
+          >
+            <div className="absolute top-0 right-0 z-10">
+              <Status
+                color="var(--status)"
+                length={items.length}
+                curIndex={curIndex}
+              />
+            </div>
+          </Carousel>
+        </BlurFade>
+      )}
     </PhotoProvider>
   );
 }

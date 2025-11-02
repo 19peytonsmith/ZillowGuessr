@@ -2,13 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import CardContent from "@/components/CardContent";
+import { Card } from "@/components/Card";
 import "../../styles/contactme.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { MagicCard } from "@/components/ui/magic-card";
-import { useTheme } from "next-themes";
 
 export default function ContactMe() {
   const [isSending, setIsSending] = useState(false);
@@ -29,8 +27,6 @@ export default function ContactMe() {
     email: "",
     message: "",
   });
-
-  const { theme } = useTheme();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -104,104 +100,6 @@ export default function ContactMe() {
 
   return (
     <div className="contact-container">
-      <div className="contact-header">
-        <ThemeToggle />
-      </div>
-      <CardContent
-        title="Feedback & Suggestions"
-        cardClassName="contact-card"
-        dividerClassName="contact-divider"
-      >
-        <p className="contact-description">
-          Have tips or suggestions to improve the game? Found a bug or have
-          feedback? I&apos;d love to hear from you!
-        </p>
-        {sendSuccess && (
-          <div className="alert alert-success">
-            ✅ Message sent successfully! Thanks for your feedback!
-          </div>
-        )}
-        {sendError && (
-          <div className="alert alert-danger">
-            ❌ Failed to send message. Please try again or email me directly at
-            19peytonsmith@gmail.com
-          </div>
-        )}
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-3">
-            <label htmlFor="name" className="form-label">
-              Name
-            </label>
-            <input
-              type="text"
-              className={`form-control contact-input ${
-                invalidFields.name ? "is-invalid" : ""
-              }`}
-              id="name"
-              placeholder="Your name"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-            {invalidFields.name && (
-              <div className="invalid-feedback d-block">
-                Please enter your name.
-              </div>
-            )}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email
-            </label>
-            <input
-              type="email"
-              className={`form-control contact-input ${
-                invalidFields.email ? "is-invalid" : ""
-              }`}
-              id="email"
-              placeholder="your.email@example.com"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-            {invalidFields.email && (
-              <div className="invalid-feedback d-block">
-                Please enter a valid email address.
-              </div>
-            )}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="message" className="form-label">
-              Message
-            </label>
-            <textarea
-              className={`form-control contact-input ${
-                invalidFields.message ? "is-invalid" : ""
-              }`}
-              id="message"
-              rows={5}
-              placeholder="Your message..."
-              value={formData.message}
-              onChange={handleInputChange}
-            ></textarea>
-            {invalidFields.message && (
-              <div className="invalid-feedback d-block">
-                Please enter your message.
-              </div>
-            )}
-          </div>
-          <button
-            type="submit"
-            className={`btn btn-primary contact-submit ${
-              isInvalid ? "invalid" : ""
-            }`}
-          >
-            Send Message
-            <span className={`send-icon ${isSending ? "sending" : ""}`}>
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </span>
-          </button>
-        </form>
-      </CardContent>
-
       <div className="contact-actions">
         <Link href="/" className="contact-button">
           <span className="back-icon">
@@ -209,7 +107,102 @@ export default function ContactMe() {
           </span>
           Back home
         </Link>
+        <ThemeToggle />
       </div>
+      <Card className="rounded-xl">
+        <div className="contact-card">
+          <h2>Feedback & Suggestions</h2>
+          <hr className="contact-divider" />
+          <p className="contact-description">
+            Have tips or suggestions to improve the game? Found a bug or have
+            feedback? I&apos;d love to hear from you!
+          </p>
+          {sendSuccess && (
+            <div className="alert alert-success">
+              ✅ Message sent successfully! Thanks for your feedback!
+            </div>
+          )}
+          {sendError && (
+            <div className="alert alert-danger">
+              ❌ Failed to send message. Please try again or email me directly
+              at 19peytonsmith@gmail.com
+            </div>
+          )}
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="mb-3">
+              <label htmlFor="name" className="form-label">
+                Name
+              </label>
+              <input
+                type="text"
+                className={`form-control contact-input ${
+                  invalidFields.name ? "is-invalid" : ""
+                }`}
+                id="name"
+                placeholder="Your name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+              {invalidFields.name && (
+                <div className="invalid-feedback d-block">
+                  Please enter your name.
+                </div>
+              )}
+            </div>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">
+                Email
+              </label>
+              <input
+                type="email"
+                className={`form-control contact-input ${
+                  invalidFields.email ? "is-invalid" : ""
+                }`}
+                id="email"
+                placeholder="your.email@example.com"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+              {invalidFields.email && (
+                <div className="invalid-feedback d-block">
+                  Please enter a valid email address.
+                </div>
+              )}
+            </div>
+            <div className="mb-3">
+              <label htmlFor="message" className="form-label">
+                Message
+              </label>
+              <textarea
+                className={`form-control contact-input ${
+                  invalidFields.message ? "is-invalid" : ""
+                }`}
+                id="message"
+                rows={5}
+                placeholder="Your message..."
+                value={formData.message}
+                onChange={handleInputChange}
+              ></textarea>
+              {invalidFields.message && (
+                <div className="invalid-feedback d-block">
+                  Please enter your message.
+                </div>
+              )}
+            </div>
+            <button
+              type="submit"
+              className={`btn btn-primary contact-submit ${
+                isInvalid ? "invalid" : ""
+              }`}
+            >
+              Send Message
+              <span className={`send-icon ${isSending ? "sending" : ""}`}>
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </span>
+            </button>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 }

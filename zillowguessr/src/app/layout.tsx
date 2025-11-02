@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Lexend_Exa } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/app.css";
-import "../styles/skeleton.css";
+import "../styles/site.css";
+import "../styles/components.css";
 import "../styles/main.css";
 import HouseBackground from "@/components/HouseBackground";
+import GridBackground from "@/components/GridBackground";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
-import { cn } from "@/lib/utils";
 
 const lexendExa = Lexend_Exa({
   variable: "--font-lexend-exa",
@@ -30,22 +29,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${lexendExa.variable} antialiased relative`}>
         <ThemeProvider>
-          <AnimatedGridPattern
-            numSquares={30}
-            maxOpacity={0.1}
-            duration={3}
-            repeatDelay={1}
-            className={cn("fixed inset-0 -z-10 w-screen h-screen")}
-            style={{ position: "fixed" }}
-          />
+          <GridBackground zIndex={0} gridSize={60} skewY={15} />
           <HouseBackground
-            zIndex={0}
+            zIndex={1}
             minSize={10}
             maxSize={1200}
             minSpeed={8}
             maxSpeed={50}
+            baseOpacity={0.04}
           />
-          <main>{children}</main>
+          <main className="relative z-10">{children}</main>
         </ThemeProvider>
       </body>
     </html>

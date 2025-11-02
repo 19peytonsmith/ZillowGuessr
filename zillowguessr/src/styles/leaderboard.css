@@ -1,4 +1,7 @@
-/* Leaderboard component styles */
+/* =================
+   LEADERBOARD PAGE
+   ================= */
+
 .leaderboard-container {
   display: flex;
   flex-direction: column;
@@ -11,40 +14,81 @@
 .leaderboard-header {
   width: 100%;
   max-width: 400px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.leaderboard-header h1 {
+  margin: 0;
 }
 
 .leaderboard-card {
   padding: 20px;
-  max-width: 400px;
-  width: 90%;
-  margin: 0 16px;
-  /* Fallback to the declared variable, then try a slightly transparent mix when supported */
-  background-color: var(--leaderboard-bg);
-  background-color: color-mix(in srgb, var(--leaderboard-bg) 85%, transparent);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
+  width: 100%;
   text-align: center;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--accent);
-  overflow: hidden;
+}
+
+.leaderboard-container > div:has(.leaderboard-card) {
+  max-width: 400px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .leaderboard-container > div:has(.leaderboard-card) {
+    width: 95%;
+  }
 }
 
 .leaderboard-divider {
   display: block;
   height: 0px;
   border: 1px solid var(--accent);
-  margin: 12px -20px; /* bleed past the card padding to the card border */
+  margin: 12px -20px;
   border-radius: 4px;
+}
+
+.leaderboard-list-wrapper {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  overflow: visible; /* Allow glow to extend outside wrapper */
 }
 
 .leaderboard-list {
   list-style: none;
-  padding: 0;
+  padding: 0 6px; /* Add horizontal padding to prevent glow cutoff */
   margin: 0;
   text-align: left;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: auto; /* Disable smooth scroll for instant sync */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+  /* Add smooth scroll transition */
+  transition: scroll-position 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.leaderboard-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 80%, white);
 }
 
 .leaderboard-item {
@@ -54,7 +98,6 @@
   padding: 8px 12px;
   color: var(--text);
   border-bottom: 1px solid rgba(100, 100, 100, 0.08);
-  /* allow smooth background and transform transitions for FLIP animations */
   transition:
     background-color 280ms ease,
     transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -67,30 +110,25 @@
 .score-value {
   color: var(--price-actual);
   font-weight: 600;
+  transition:
+    color 180ms ease,
+    transform 220ms ease;
 }
 
-/* Ensure the theme toggle sits nicely in the header */
-.leaderboard-header .theme-toggle {
-  margin-left: 8px;
-}
-
-/* superscript-like play number next to "Game" */
 .play-number {
   opacity: 0.5;
   display: inline-block;
-  font-size: 0.78em; /* a bit smaller than surrounding text */
-  transform: translateY(-0.35em); /* lift up to look like superscript */
+  font-size: 0.78em;
+  transform: translateY(-0.35em);
   line-height: 1;
 }
 
 .timestamp-icon {
   display: inline-block;
-  vertical-align: middle; /* align with surrounding text */
+  vertical-align: middle;
   margin-left: 6px;
-  /* Use theme primary text color so the icon is visible in both light and dark themes */
   color: var(--text, #0f1720);
   cursor: pointer;
-  /* make the icon a little bigger */
   font-size: 14px;
   line-height: 1;
 }
@@ -98,49 +136,87 @@
 .timestamp-icon svg {
   width: 16px;
   height: 16px;
-  vertical-align: middle; /* ensure svg centers with text */
+  vertical-align: middle;
   display: inline-block;
 }
 
-/* Top 3 medals */
+/* Top 3 medal colors */
 .leaderboard-item.rank-1 .score-value {
-  color: #ffd700; /* gold */
+  color: #ffd700;
 }
-.leaderboard-item.rank-2 .score-value {
-  color: #c0c0c0; /* silver */
-}
-.leaderboard-item.rank-3 .score-value {
-  color: #cd7f32; /* bronze */
-}
-/* Non-top items keep the theme price color (already set by .score-value) */
 
-/* Subtle background highlights for top 3 rows */
+.leaderboard-item.rank-2 .score-value {
+  color: #c0c0c0;
+}
+
+.leaderboard-item.rank-3 .score-value {
+  color: #cd7f32;
+}
+
+/* Top 3 background highlights */
 .leaderboard-item.rank-1 {
   background: rgba(255, 215, 0, 0.06);
   border-radius: 8px;
   margin: 6px 0;
 }
+
 .leaderboard-item.rank-2 {
   background: rgba(192, 192, 192, 0.06);
   border-radius: 8px;
   margin: 6px 0;
 }
+
 .leaderboard-item.rank-3 {
   background: rgba(205, 127, 50, 0.06);
   border-radius: 8px;
   margin: 6px 0;
 }
 
-/* Animating (newly-inserted) row highlight — blue tint similar to medal tints */
+/* Animating row highlight */
 .leaderboard-item.animating {
-  background: rgba(59, 130, 246, 0.08); /* blue-500 @ 8% */
+  background: rgba(59, 130, 246, 0.08);
   box-shadow: 0 6px 18px rgba(59, 130, 246, 0.06);
   border-radius: 8px;
+  position: relative;
+  z-index: 2;
 }
 
-/* Landed effect: subtle flash + radiating border to indicate the row finished moving */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow:
+      0 0 8px rgba(59, 130, 246, 0.3),
+      inset 0 0 8px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.6),
+      inset 0 0 12px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Most recent score - persistent pulsing glow */
+.leaderboard-item.most-recent {
+  position: relative;
+  z-index: 2;
+}
+
+.leaderboard-item.most-recent::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  pointer-events: none;
+  z-index: -1;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Landed effect */
 .leaderboard-item.landed {
-  position: relative; /* for the ::after radiating element */
+  position: relative;
   z-index: 1;
   animation: landed-flash 900ms ease forwards;
 }
@@ -182,36 +258,60 @@
   }
 }
 
-/* subtle transition for numeric value changes */
-.score-value {
-  transition:
-    color 180ms ease,
-    transform 220ms ease;
-}
-
-/* Actions area below the card (centers the button) */
 .leaderboard-actions {
   width: 100%;
   display: flex;
   justify-content: center;
+  gap: 12px;
   margin-top: 12px;
 }
 
+.leaderboard-home,
 .leaderboard-tryagain {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 8px 14px;
   border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
   font-weight: 600;
   cursor: pointer;
   transition:
     background-color 180ms ease,
     color 180ms ease,
     transform 120ms ease;
+}
+
+.leaderboard-home {
+  border: 1px solid var(--btn-primary);
+  background: transparent;
+  color: var(--btn-primary);
+}
+
+.leaderboard-home:hover {
+  background: var(--btn-primary);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.leaderboard-home:focus {
+  outline: 2px solid color-mix(in srgb, var(--btn-primary) 50%, transparent);
+  outline-offset: 2px;
+}
+
+.home-icon,
+.retry-icon {
+  will-change: transform;
+}
+
+.leaderboard-home:hover .home-icon {
+  animation: bounce-icon 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) 1 both;
+}
+
+.leaderboard-tryagain {
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
 }
 
 .leaderboard-tryagain:hover {
@@ -223,12 +323,6 @@
 .leaderboard-tryagain:focus {
   outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
   outline-offset: 2px;
-}
-
-.retry-icon {
-  display: inline-block;
-  line-height: 1;
-  will-change: transform;
 }
 
 .leaderboard-tryagain:hover .retry-icon {
@@ -244,10 +338,8 @@
   }
 }
 
-/* Ensure MUI Tooltip text uses the app's font-family (tooltips are portaled so
-   they may not inherit body styles reliably). Keep size consistent with UI. */
 .MuiTooltip-tooltip {
   font-family: inherit !important;
   letter-spacing: calc(var(--tracking) * 1.1);
-  font-size: 0.875rem; /* 14px-ish */
+  font-size: 0.875rem;
 }

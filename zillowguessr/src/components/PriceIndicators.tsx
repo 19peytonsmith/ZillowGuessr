@@ -14,8 +14,6 @@ type PriceIndicatorsProps = {
 export default function PriceIndicators({
   value,
   prettyValue,
-  chosenColor = "var(--price-chosen)",
-  actualColor = "var(--price-actual)",
   top = -20,
 }: PriceIndicatorsProps) {
   const toPercent = (v: number) => `${(v / 1000) * 100}%`;
@@ -35,18 +33,11 @@ export default function PriceIndicators({
     <>
       <div
         aria-hidden
-        className={`price-indicator-container ${animateKey}`}
+        className="price-indicator-container absolute z-10 flex flex-col items-center pointer-events-none -translate-x-1/2"
+        key={`guessed-${animateKey}`}
         style={{
-          position: "absolute",
-          // if overlapping, move guessed indicator below the slider by adding vertical offset
           top: top + 60,
           left: toPercent(value[0]),
-          transform: "translateX(-50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pointerEvents: "none",
-          zIndex: 10,
         }}
       >
         <div className="price-indicator-label price-indicator-animate">
@@ -56,16 +47,10 @@ export default function PriceIndicators({
 
       <div
         aria-hidden
+        className="absolute z-10 flex flex-col items-center pointer-events-none -translate-x-1/2"
         style={{
-          position: "absolute",
           top,
           left: toPercent(value[1]),
-          transform: "translateX(-50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pointerEvents: "none",
-          zIndex: 10,
         }}
       >
         <div className="price-indicator-label price-indicator-animate actual">
