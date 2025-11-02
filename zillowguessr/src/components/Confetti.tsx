@@ -1,118 +1,119 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
+import type { Options as ConfettiOptions } from "canvas-confetti";
+import confetti from "canvas-confetti";
 
 type Props = {
   active: boolean;
   duration?: number; // ms
 };
 
-// Subtle confetti rain from the top. Small particle count, pastel colors,
-// low opacity and short duration for a non-flashy effect.
-export default function Confetti({ active, duration = 5000 }: Props) {
+// Confetti explosion with a "bang" effect - shoots out and falls down with gravity
+export default function Confetti({ active, duration = 3000 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const confettiInstanceRef = useRef<ReturnType<typeof confetti.create> | null>(
+    null
+  );
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fireConfetti = useCallback(() => {
+    if (!confettiInstanceRef.current) return;
+
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 },
+      colors: ["#FFC857", "#8BD3DD", "#FF9AA2", "#C9B6E1", "#BDECB6"],
+    };
+
+    function fire(particleRatio: number, opts: ConfettiOptions) {
+      confettiInstanceRef.current?.({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    }
+
+    // Create multiple bursts with wide spread to cover most of the screen
+    fire(0.25, {
+      spread: 160,
+      startVelocity: 65,
+    });
+
+    fire(0.2, {
+      spread: 180,
+      startVelocity: 55,
+    });
+
+    fire(0.35, {
+      spread: 200,
+      decay: 0.91,
+      scalar: 0.8,
+      startVelocity: 60,
+    });
+
+    fire(0.1, {
+      spread: 220,
+      startVelocity: 45,
+      decay: 0.92,
+      scalar: 1.2,
+    });
+
+    fire(0.1, {
+      spread: 240,
+      startVelocity: 50,
+    });
+  }, []);
 
   useEffect(() => {
     if (!active) return;
 
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    let width = window.innerWidth;
-    const height = window.innerHeight;
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.style.position = "fixed";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
-    canvas.style.pointerEvents = "none";
-    canvas.style.zIndex = "9999";
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    ctx.scale(dpr, dpr);
+    // Create confetti instance
+    confettiInstanceRef.current = confetti.create(canvas, {
+      resize: true,
+      useWorker: true,
+    });
 
-    const colors = ["#FFC857", "#8BD3DD", "#FF9AA2", "#C9B6E1", "#BDECB6"];
+    // Fire confetti immediately
+    fireConfetti();
 
-    type Particle = {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      color: string;
-      rot: number;
-      rotV: number;
-      opacity: number;
-    };
-
-    const particleCount = 26; // small and subtle
-    const particles: Particle[] = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: -Math.random() * 80, // start slightly above
-        vx: (Math.random() - 0.5) * 0.6, // gentle horizontal drift
-        vy: 1 + Math.random() * 1.4, // gentle fall speed
-        size: 6 + Math.random() * 10,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rot: Math.random() * Math.PI * 2,
-        rotV: (Math.random() - 0.5) * 0.1,
-        opacity: 0.6 + Math.random() * 0.3,
-      });
-    }
-
-    const start = performance.now();
-
-    const draw = () => {
-      ctx.clearRect(0, 0, width, height);
-      const t = (performance.now() - start) / duration;
-
-      // fade out toward the end
-      const globalAlpha = 1 - Math.min(Math.max((t - 0.6) / 0.4, 0), 1);
-      ctx.save();
-      ctx.globalAlpha = globalAlpha;
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rot += p.rotV;
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity * globalAlpha * 0.95;
-        // draw rectangle confetti (subtle)
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-        ctx.restore();
+    // Auto-cleanup after duration
+    timeoutRef.current = setTimeout(() => {
+      if (confettiInstanceRef.current) {
+        confettiInstanceRef.current.reset();
       }
-
-      ctx.restore();
-      rafRef.current = requestAnimationFrame(draw);
-    };
-
-    rafRef.current = requestAnimationFrame(draw);
-
-    const onResize = () => {
-      width = window.innerWidth;
-      canvas.width = Math.round(width * dpr);
-      canvas.style.width = `${width}px`;
-      ctx.scale(dpr, dpr);
-    };
-    window.addEventListener("resize", onResize);
+    }, duration);
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", onResize);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (confettiInstanceRef.current) {
+        confettiInstanceRef.current.reset();
+        confettiInstanceRef.current = null;
+      }
     };
-  }, [active, duration]);
+  }, [active, duration, fireConfetti]);
 
   // Only render canvas when active to keep DOM small
   if (!active) return null;
 
-  return <canvas ref={canvasRef} aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        zIndex: 9999,
+      }}
+    />
+  );
 }

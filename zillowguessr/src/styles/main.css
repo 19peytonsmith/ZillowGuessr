@@ -1,0 +1,743 @@
+/* GitHub icon styled like the theme toggle (for footer usage) */
+.theme-like {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: var(--text);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.theme-like:hover {
+  transform: translateY(-2px);
+}
+
+/* Animated breathing gradient for the splash card */
+.main-content.splash-hero {
+  position: relative;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 60%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Light-theme: make the animated gradient more visible */
+html:not([data-theme="dark"]) .main-content.splash-hero {
+  background-color: color-mix(in srgb, var(--leaderboard-bg) 20%, transparent);
+}
+
+/* Ensure all interactive content is above background elements */
+.main-content.splash-hero
+  > div:not(.house-background):not(.particles-background),
+.main-content.splash-hero > .house-background ~ *:not(.particles-background) {
+  position: relative;
+  z-index: 10;
+}
+
+/* Particles background layer */
+.particles-background {
+  z-index: 1;
+}
+
+/* Ensure the theme toggle participates in the splash header layout */
+.main-content.splash-hero .theme-toggle {
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+}
+
+/* Improve border contrast for controls inside the splash card */
+.main-content.splash-hero .theme-toggle,
+.main-content.splash-hero .theme-like,
+.main-content.splash-hero .what-btn,
+.main-content.splash-hero .energy-btn,
+.main-content.splash-hero .btn-outline-secondary,
+.main-content.splash-hero .ghost-btn-accessible {
+  border-color: color-mix(in srgb, var(--text) 14%, transparent) !important;
+  background: transparent !important;
+}
+
+/* Slightly stronger border in dark theme to maintain contrast */
+html[data-theme="dark"] .main-content.splash-hero .theme-like,
+html[data-theme="dark"] .main-content.splash-hero .theme-toggle,
+html[data-theme="dark"] .main-content.splash-hero .what-btn,
+html[data-theme="dark"] .main-content.splash-hero .energy-btn,
+html[data-theme="dark"] .main-content.splash-hero .btn-outline-secondary,
+html[data-theme="dark"] .main-content.splash-hero .ghost-btn-accessible {
+  border-color: color-mix(in srgb, var(--text) 22%, transparent) !important;
+}
+
+/* Energy drink / tip button — small pill that matches the other controls */
+.energy-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    color 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
+  height: 40px; /* match theme-like / theme-toggle */
+  line-height: 1;
+}
+.energy-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.energy-btn:hover {
+  color: var(--btn-primary) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 26%,
+    transparent
+  ) !important;
+  transform: translateY(-2px);
+}
+
+/* Lightning bolt radiating glow animation on hover */
+.main-content.splash-hero .energy-btn svg {
+  transform-origin: center;
+  transition: filter 150ms ease;
+}
+
+@keyframes bolt-radiate {
+  0% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--btn-primary))
+      drop-shadow(0 0 12px var(--btn-primary))
+      drop-shadow(
+        0 0 16px color-mix(in srgb, var(--btn-primary) 40%, transparent)
+      );
+  }
+  100% {
+    filter: drop-shadow(0 0 4px var(--btn-primary))
+      drop-shadow(
+        0 0 8px color-mix(in srgb, var(--btn-primary) 60%, transparent)
+      );
+  }
+}
+
+.main-content.splash-hero .energy-btn:hover svg {
+  animation: bolt-radiate 600ms ease-in-out forwards;
+}
+
+/* Make the energy button text smaller so the long label fits nicely */
+.energy-btn .buy-energy-text {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+/* Ensure contact button matches height and alignment of theme-toggle/github */
+.main-content.splash-hero .btn-outline-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 40px !important;
+  /* increase horizontal padding for better balance with Play */
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+}
+
+/* Hover state for controls - theme toggle, GitHub icon, what button */
+.main-content.splash-hero .theme-like:hover,
+.main-content.splash-hero .theme-toggle:hover,
+.main-content.splash-hero .what-btn:hover {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+
+/* Ensure icons inherit color for hover effects */
+.main-content.splash-hero .theme-like svg,
+.main-content.splash-hero .theme-toggle svg,
+.main-content.splash-hero .what-btn svg,
+.main-content.splash-hero .icon-link svg,
+.main-content.splash-hero .energy-btn svg {
+  color: inherit;
+  fill: currentColor;
+  vertical-align: middle;
+}
+
+/* Buttons in the splash: outline look with hover effects */
+.main-content.splash-hero .btn-outline-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  border-color: color-mix(in srgb, var(--text) 12%, transparent) !important;
+}
+
+.main-content.splash-hero .btn-outline-secondary:hover,
+.main-content.splash-hero .ghost-btn-accessible:hover {
+  background: transparent !important;
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+}
+
+/* Animated gradient background pseudo-element */
+.main-content.splash-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(30, 41, 59, 0.15) 0%,
+      rgba(51, 65, 85, 0.12) 20%,
+      rgba(71, 85, 105, 0.1) 40%,
+      rgba(100, 116, 139, 0.08) 60%,
+      rgba(148, 163, 184, 0.06) 80%,
+      rgba(203, 213, 225, 0.04) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.005) 0px,
+      rgba(255, 255, 255, 0.005) 1px,
+      transparent 2px
+    );
+  background-size:
+    100% 100%,
+    100% 100%;
+  background-repeat: no-repeat, repeat;
+  background-blend-mode: overlay, normal;
+  filter: blur(8px) saturate(110%);
+  opacity: 0.95;
+  transition:
+    opacity 600ms ease,
+    filter 600ms ease;
+}
+
+/* Light theme gradient override */
+html:not([data-theme="dark"]) .main-content.splash-hero::before {
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(245, 245, 245, 0.35) 0%,
+      rgba(250, 250, 250, 0.28) 25%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(248, 248, 248, 0.18) 75%,
+      rgba(240, 240, 240, 0.12) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      transparent 2px
+    );
+  opacity: 1;
+}
+
+/* Subtle animation for the title */
+.splash-title {
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  margin: 64px 0 12px 0;
+  padding: 12px 24px;
+  will-change: transform, text-shadow;
+  backface-visibility: hidden;
+  animation: title-subtle 8s cubic-bezier(0.22, 0.9, 0.35, 1) infinite;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes title-subtle {
+  0% {
+    transform: translateY(0);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
+  }
+  20% {
+    transform: translateY(-4px);
+    text-shadow:
+      0 1.5px 5px rgba(0, 0, 0, 0.35),
+      0 2.5px 10px rgba(0, 0, 0, 0.25),
+      0 3.5px 14px rgba(0, 0, 0, 0.15);
+  }
+  40% {
+    transform: translateY(2px);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
+  }
+  60% {
+    transform: translateY(-2px);
+    text-shadow:
+      0 1.2px 4.5px rgba(0, 0, 0, 0.32),
+      0 2.2px 9px rgba(0, 0, 0, 0.22),
+      0 3.2px 13px rgba(0, 0, 0, 0.12);
+  }
+  80% {
+    transform: translateY(1px);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: translateY(0);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 3px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes ripple-swipe {
+  0%,
+  74% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  76% {
+    transform: scale(0.6);
+    opacity: 0.28;
+  }
+  82% {
+    transform: scale(1.2);
+    opacity: 0.18;
+  }
+  88% {
+    transform: scale(1.6);
+    opacity: 0.06;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* House background image */
+.house-background {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  width: 100%;
+  max-width: 1000px;
+  padding-bottom: 100%;
+  height: 0;
+  opacity: 0.8;
+  background-image: url("/assets/HouseHomePage.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top center;
+  box-shadow:
+    inset 0 60px 80px -20px rgba(0, 0, 0, 0.3),
+    inset 0 -60px 80px -20px rgba(0, 0, 0, 0.3);
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 60%,
+      rgba(0, 0, 0, 0.7) 80%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    radial-gradient(
+      ellipse 50% 100% at center,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.7) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.15) 85%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 60%,
+      rgba(0, 0, 0, 0.7) 80%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    radial-gradient(
+      ellipse 50% 100% at center,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.7) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.15) 85%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  mask-composite: intersect;
+}
+
+/* Splash lead text */
+.splash-lead {
+  font-size: 1.125rem;
+  margin-bottom: 20px;
+  text-shadow:
+    0 1px 6px rgba(0, 0, 0, 0.4),
+    0 2px 12px rgba(0, 0, 0, 0.3),
+    0 3px 18px rgba(0, 0, 0, 0.2);
+}
+
+.splash-cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+  /* Stack CTAs (Play / Leaderboards) on separate rows */
+  flex-direction: column;
+}
+
+/* Improve splash title layout on small screens */
+@media (max-width: 768px) {
+  .splash-title {
+    font-size: clamp(32px, 10vw, 60px);
+    padding: 8px 12px !important;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    margin-top: 0;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 2px 6px rgba(0, 0, 0, 0.15),
+      0 3px 9px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .splash-lead {
+    padding: 0 8px;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      0 3px 9px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .house-background {
+    width: 200%;
+    max-width: 2000px;
+  }
+
+  .splash-cta {
+    gap: 12px;
+  }
+
+  .main-content.splash-hero .meta-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .main-content.splash-hero .meta-row .links {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .main-content.splash-hero .meta-row .byline {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Prominent Play button */
+.play-btn {
+  --btn-h: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--btn-h);
+  padding: 0 96px;
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--btn-primary),
+    color-mix(in srgb, var(--btn-primary) 70%, black 15%)
+  );
+  color: var(--bg) !important;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    box-shadow 220ms;
+  position: relative;
+  overflow: visible;
+  text-decoration: none !important;
+}
+
+.play-btn:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
+}
+
+.play-btn:active {
+  transform: translateY(-2px) scale(0.995);
+}
+
+.play-btn.loading {
+  animation: play-loading-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+.play-btn.loading .play-letter {
+  animation: play-loading-wave 1.2s ease-in-out infinite !important;
+}
+
+@keyframes play-loading-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 18px 50px rgba(2, 6, 23, 0.25);
+  }
+}
+
+@keyframes play-loading-wave {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-4px) scale(1.1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(4px) scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.play-btn .play-text {
+  display: inline-flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.play-letter {
+  display: inline-block;
+  transform-origin: center;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+.play-btn:hover .play-letter {
+  animation: play-letter-bounce 720ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+
+@keyframes play-letter-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-8px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Meta row */
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.byline {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* What button - small question icon */
+.main-content.splash-hero .what-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  color: var(--text);
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    color 220ms,
+    border-color 220ms;
+}
+
+.main-content.splash-hero .what-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Modal styles */
+.splash-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 24px;
+}
+
+.splash-modal {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 760px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(2, 6, 23, 0.25);
+}
+
+.splash-modal h2 {
+  font-size: clamp(22px, 3.6vw, 30px);
+  line-height: 1.05;
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.splash-modal h3 {
+  font-size: 1.05rem;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.splash-modal .btn-outline-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  color: var(--text);
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.splash-modal .btn-outline-secondary:hover,
+.splash-modal .btn-outline-secondary:focus {
+  color: var(--btn-primary) !important;
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--btn-primary) 28%,
+    transparent
+  ) !important;
+}
+
+.splash-modal .btn-outline-secondary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--btn-primary) 26%, transparent);
+  outline-offset: 2px;
+}
+
+.splash-modal .modal-close {
+  position: static;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: none !important;
+  color: var(--text);
+}
+
+/* Modal open state */
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open .splash-wrap,
+body.modal-open .main-content.splash-hero {
+  filter: brightness(0.6) saturate(0.92);
+  transition: filter 220ms ease;
+  pointer-events: none;
+}
+
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+/* Mobile modal adjustments */
+@media (max-width: 640px) {
+  .splash-modal-backdrop {
+    align-items: flex-start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .splash-modal {
+    border-radius: 10px;
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    margin: 0 12px;
+    width: calc(100% - 24px);
+  }
+}

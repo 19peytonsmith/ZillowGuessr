@@ -4,15 +4,20 @@ import React from "react";
 
 export default function LoadingSkeleton() {
   return (
-    <div
-      className="main-content p-4 mx-auto"
-      style={{ backgroundColor: "var(--card-bg)" }}
-    >
-      <div className="skeleton skeleton-title" />
+    <div className="main-content p-4 mx-auto bg-[var(--card-bg)]">
+      {/* Header section */}
+      <div className="play-page-header flex justify-between items-center mb-1">
+        <div className="skeleton skeleton-title" />
+        <div className="flex items-center gap-2">
+          <div className="skeleton w-[80px] h-8 rounded-lg" />
+          <div className="skeleton w-12 h-8 rounded-full" />
+        </div>
+      </div>
 
-      <div className="d-flex justify-content-between align-items-center my-2">
+      {/* Property info row */}
+      <div className="property-info-row flex justify-between">
         <div className="skeleton skeleton-subtitle" />
-        <div className="d-flex gap-2">
+        <div className="property-data flex gap-2 my-2">
           <div className="skeleton skeleton-chip" />
           <div className="skeleton skeleton-chip" />
           <div className="skeleton skeleton-chip" />
@@ -20,12 +25,12 @@ export default function LoadingSkeleton() {
       </div>
 
       <hr />
-      <div className="d-flex justify-content-between align-items-center">
+      <div className="flex justify-between items-center my-2">
         <div className="skeleton skeleton-score" />
         <div className="skeleton skeleton-show-map" />
       </div>
 
-      <hr />
+      <hr className="mt-0" />
 
       <div className="carousel-stack">
         <div className="skeleton carousel-left-left" />
@@ -37,9 +42,13 @@ export default function LoadingSkeleton() {
 
       <div className="mt-3">
         <div className="skeleton skeleton-slider" />
+        <div className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:justify-end">
+          <div className="skeleton w-2.5 h-4 rounded-sm hidden sm:block" />
+          <div className="skeleton w-full sm:w-[120px] h-8 rounded-md" />
+        </div>
       </div>
 
-      <div className="round-div mt-3 d-flex justify-content-center">
+      <div className="round-div mt-3 flex justify-center">
         <div className="skeleton skeleton-rounds" />
       </div>
 

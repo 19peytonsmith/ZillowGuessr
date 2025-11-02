@@ -1,8 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Leaderboard from "@/components/Leaderboard";
+import LeaderboardLoadingSkeleton from "@/components/LeaderboardLoadingSkeleton";
 
 export default function LeaderboardsPage() {
-  return <Leaderboard />;
+  return (
+    <Suspense fallback={<LeaderboardLoadingSkeleton />}>
+      <Leaderboard />
+    </Suspense>
+  );
 }

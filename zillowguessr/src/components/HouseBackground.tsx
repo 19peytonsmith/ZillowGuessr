@@ -27,7 +27,7 @@ type Sprite = {
 
 export default function HouseBackground({
   svgSrc = "/assets/HouseBackground.svg",
-  count = 25,
+  count = 15,
   minSize = 10,
   maxSize = 160,
   minSpeed = 6,

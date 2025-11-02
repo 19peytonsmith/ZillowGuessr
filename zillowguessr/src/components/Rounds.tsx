@@ -22,7 +22,7 @@ export default function Rounds({
   const circles = Array.from({ length: totalRounds }, (_, i) => i + 1);
 
   return (
-    <h5 className="d-flex gap-2 justify-content-center">
+    <h5 className="flex gap-2 justify-center">
       Round
       {circles.map((circle, index) => {
         if (index < round - 1) {
@@ -30,12 +30,8 @@ export default function Rounds({
           return (
             <i
               key={index}
-              className="bi bi-ban text-danger"
+              className={`bi bi-ban text-danger ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
               onClick={!disabled ? () => handleClick(index + 1) : undefined}
-              style={{
-                cursor: disabled ? "not-allowed" : "pointer",
-                opacity: disabled ? 0.5 : 1,
-              }}
             ></i>
           );
         } else if (index === round - 1) {
@@ -44,12 +40,8 @@ export default function Rounds({
           return (
             <i
               key={index}
-              className={`bi bi-${round}-circle text-success`}
+              className={`bi bi-${round}-circle text-success ${disabled ? "opacity-50" : ""} ${clickable ? "cursor-pointer" : "cursor-default"}`}
               onClick={clickable ? onCurrentClick : undefined}
-              style={{
-                cursor: clickable ? "pointer" : "default",
-                opacity: disabled ? 0.5 : 1,
-              }}
               title={clickable ? `Return to round ${round}` : undefined}
             ></i>
           );

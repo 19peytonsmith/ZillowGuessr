@@ -1,52 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document === "undefined") return "light";
-    const attr = document.documentElement.getAttribute("data-theme");
-    return attr === "dark" || attr === "light" ? attr : "light";
-  });
+  const { theme, setTheme } = useTheme();
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setMounted(true);
-
-    // Cross-tab sync
-    const onStorage = (e: StorageEvent) => {
-      if (
-        e.key === "theme" &&
-        (e.newValue === "dark" || e.newValue === "light")
-      ) {
-        setTheme(e.newValue);
-        document.documentElement.setAttribute("data-theme", e.newValue);
-        document.cookie = `theme=${e.newValue};path=/;max-age=31536000`;
-      }
-    };
-    window.addEventListener("storage", onStorage);
-
-    return () => {
-      window.removeEventListener("storage", onStorage);
-    };
   }, []);
 
-  useEffect(() => {
-    // Persist whenever theme changes (user toggled or storage sync)
-    try {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-      document.cookie = `theme=${theme};path=/;max-age=31536000`;
-    } catch {}
-  }, [theme]);
+  const toggle = useCallback(async () => {
+    if (!buttonRef.current) {
+      setTheme(theme === "light" ? "dark" : "light");
+      return;
+    }
 
-  function toggle() {
-    setTheme((t) => (t === "light" ? "dark" : "light"));
-  }
+    // Check if view transitions are supported
+    if (!document.startViewTransition) {
+      setTheme(theme === "light" ? "dark" : "light");
+      return;
+    }
+
+    const newTheme = theme === "light" ? "dark" : "light";
+
+    await document.startViewTransition(() => {
+      setTheme(newTheme);
+    }).ready;
+
+    const { top, left, width, height } =
+      buttonRef.current.getBoundingClientRect();
+    const x = left + width / 2;
+    const y = top + height / 2;
+    const maxRadius = Math.hypot(
+      Math.max(left, window.innerWidth - left),
+      Math.max(top, window.innerHeight - top)
+    );
+
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${maxRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 400,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
+  }, [theme, setTheme]);
 
   return (
     <button
+      ref={buttonRef}
       role="switch"
       aria-checked={theme === "dark"}
       aria-label={

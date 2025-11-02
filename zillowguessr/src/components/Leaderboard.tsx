@@ -1,32 +1,36 @@
 // src/components/Leaderboard.tsx
 "use client";
 
-import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import "../styles/leaderboard.css";
 import ThemeToggle from "./ThemeToggle";
 import LeaderboardLoadingSkeleton from "./LeaderboardLoadingSkeleton";
 import Tooltip from "@mui/material/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { faRotateRight, faHome } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "./Confetti";
+import { Card } from "./Card";
+import { ProgressiveBlur } from "./ProgressiveBlur";
+import { motion } from "framer-motion";
 
 export default function Leaderboard() {
   type Entry = { score: number; playNumber: number; ts?: number | null };
   const [leaderboardScores, setLeaderboardScores] = useState<Entry[]>([]);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromPlay = searchParams.get("fromPlay") === "true";
   // displayedScores maps playNumber -> currently-displayed numeric score (for animation)
   const [displayedScores, setDisplayedScores] = useState<
     Record<number, number>
   >({});
-  const [animatingEntry, setAnimatingEntry] = useState<{
-    playNumber: number;
-    target: number;
-  } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [renderOrder, setRenderOrder] = useState<number[]>([]);
   const [highlightedPlayNumber, setHighlightedPlayNumber] = useState<
+    number | null
+  >(null);
+  const [mostRecentPlayNumber, setMostRecentPlayNumber] = useState<
     number | null
   >(null);
   const animationDelayRef = useRef<number | null>(null);
@@ -136,68 +140,164 @@ export default function Leaderboard() {
     if (!leaderboardScores || leaderboardScores.length === 0) return;
     const last = leaderboardScores[leaderboardScores.length - 1];
     // Consider it "just played" if timestamp is very recent (30s)
-    const recentWindow = 30 * 1000;
+    const recentWindow = 300 * 1000;
     if (last && last.ts && Date.now() - last.ts < recentWindow) {
+      // Calculate final position based on score
+      const sorted = leaderboardScores
+        .slice()
+        .sort((a, b) => b.score - a.score);
+      const targetIndex = sorted.findIndex(
+        (e) => e.playNumber === last.playNumber
+      );
+
       // Move newly-played entry to the bottom of the render order and hold there for 1s
       setRenderOrder((prev) => {
         const copy = prev.filter((p) => p !== last.playNumber);
         copy.push(last.playNumber);
         return copy;
       });
-      // highlight the new row immediately (blue tint) during hold and stepping
+      // highlight the new row immediately (blue tint) during hold and movement
       setHighlightedPlayNumber(last.playNumber);
-      // hold at bottom for 1s before animating row jumps
+
+      // hold at bottom for 1s before animating to final position
       if (animationDelayRef.current)
         window.clearTimeout(animationDelayRef.current);
       animationDelayRef.current = window.setTimeout(() => {
-        setAnimatingEntry({ playNumber: last.playNumber, target: last.score });
+        // Move to final position
+        setRenderOrder((prev) => {
+          const copy = prev.filter((p) => p !== last.playNumber);
+          copy.splice(targetIndex, 0, last.playNumber);
+          return copy;
+        });
+
+        // Mark as landed after animation completes
+        setTimeout(() => {
+          if (targetIndex === 0) {
+            setShowConfetti(true);
+          }
+          setLandedPlayNumber(last.playNumber);
+          setHighlightedPlayNumber(null);
+
+          if (landingTimeoutRef.current)
+            window.clearTimeout(landingTimeoutRef.current);
+          landingTimeoutRef.current = window.setTimeout(() => {
+            setLandedPlayNumber(null);
+            // Add the persistent pulsing glow after landed animation completes
+            setMostRecentPlayNumber(last.playNumber);
+            landingTimeoutRef.current = null;
+          }, 900);
+        }, 2000); // Match Framer Motion animation duration
+
         animationDelayRef.current = null;
-      }, 1000);
+      }, 1000); // 1000ms hold at bottom
     }
   }, [leaderboardScores]);
 
-  // Refs for FLIP animation
+  // Scroll to bottom when a new highlighted item is set, then scroll to center when it moves
+  useEffect(() => {
+    if (!highlightedPlayNumber) return;
+
+    // Wait for list ref to be ready
+    const waitForList = () => {
+      if (!listRef.current) {
+        setTimeout(waitForList, 50);
+        return;
+      }
+
+      const list = listRef.current;
+
+      // Wait for DOM to fully render the new item
+      const tryScroll = (attempts = 0) => {
+        if (attempts > 10) return;
+
+        const item = list.querySelector(
+          `[data-play-number="${highlightedPlayNumber}"]`
+        );
+        if (item) {
+          // Instantly scroll to bottom
+          const targetScroll = list.scrollHeight - list.clientHeight;
+          list.scrollTop = targetScroll;
+        } else {
+          setTimeout(() => tryScroll(attempts + 1), 100);
+        }
+      };
+
+      tryScroll();
+    };
+
+    waitForList();
+  }, [highlightedPlayNumber]);
+
+  // When renderOrder changes (item moves to final position), track and center it during animation
+  useEffect(() => {
+    if (!highlightedPlayNumber || !listRef.current) return;
+
+    const list = listRef.current;
+    const item = list.querySelector(
+      `[data-play-number="${highlightedPlayNumber}"]`
+    ) as HTMLElement;
+
+    if (!item) return;
+
+    // Calculate if item is at bottom (initial position)
+    const isAtBottom =
+      renderOrder[renderOrder.length - 1] === highlightedPlayNumber;
+    if (isAtBottom) return; // Don't scroll yet, wait for it to move
+
+    // Item has moved to final position, track it during the animation
+    const animationDuration = 3000; // Match the 3s animation duration
+    const delayBeforeTracking = 500; // Wait 0.5s before starting to center
+    const startTime = Date.now();
+    let rafId: number;
+
+    const trackElement = () => {
+      const elapsed = Date.now() - startTime;
+
+      // Don't start tracking until after the delay
+      if (elapsed < delayBeforeTracking) {
+        rafId = requestAnimationFrame(trackElement);
+        return;
+      }
+
+      const progress = Math.min(elapsed / animationDuration, 1);
+
+      const listRect = list.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const itemTop = itemRect.top - listRect.top + list.scrollTop;
+      const itemHeight = itemRect.height;
+      const listHeight = list.clientHeight;
+
+      // Calculate center position
+      const targetScroll = itemTop - listHeight / 2 + itemHeight / 2;
+      const currentScroll = list.scrollTop;
+      const distance = targetScroll - currentScroll;
+
+      // Smoothly interpolate to keep item centered
+      list.scrollTop = currentScroll + distance * 0.2;
+
+      // Continue tracking during animation
+      if (progress < 1) {
+        rafId = requestAnimationFrame(trackElement);
+      } else {
+        // Final snap to perfect center
+        list.scrollTop = targetScroll;
+      }
+    };
+
+    // Start tracking with a small delay
+    setTimeout(() => {
+      rafId = requestAnimationFrame(trackElement);
+    }, 50);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [highlightedPlayNumber, renderOrder]);
+
+  // Refs for animation
   const listRef = useRef<HTMLUListElement | null>(null);
-  const prevPositionsRef = useRef<Map<number, number>>(new Map());
-  const animStepRef = useRef<number | null>(null);
   const landingTimeoutRef = useRef<number | null>(null);
   const [landedPlayNumber, setLandedPlayNumber] = useState<number | null>(null);
-
-  // FLIP-style layout animation whenever rendered ordering or displayedScores changes
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const nodes = Array.from(list.querySelectorAll("li")) as HTMLElement[];
-    const newPositions = new Map<number, number>();
-    nodes.forEach((n) => {
-      const pn = Number(n.dataset.playNumber);
-      newPositions.set(pn, n.getBoundingClientRect().top);
-    });
-
-    const prev = prevPositionsRef.current;
-    if (prev.size) {
-      nodes.forEach((n) => {
-        const pn = Number(n.dataset.playNumber);
-        const prevTop = prev.get(pn);
-        const newTop = newPositions.get(pn);
-        if (prevTop != null && newTop != null) {
-          const delta = prevTop - newTop;
-          if (delta) {
-            // move back to the previous position
-            n.style.transition = "none";
-            n.style.transform = `translateY(${delta}px)`;
-            // then animate to natural position
-            requestAnimationFrame(() => {
-              n.style.transition =
-                "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)";
-              n.style.transform = "";
-            });
-          }
-        }
-      });
-    }
-    prevPositionsRef.current = newPositions;
-  }, [renderOrder, displayedScores]);
 
   // cleanup pending animation delay on unmount
   useEffect(() => {
@@ -205,10 +305,6 @@ export default function Leaderboard() {
       if (animationDelayRef.current) {
         window.clearTimeout(animationDelayRef.current);
         animationDelayRef.current = null;
-      }
-      if (animStepRef.current) {
-        window.clearTimeout(animStepRef.current);
-        animStepRef.current = null;
       }
       setHighlightedPlayNumber(null);
       if (landingTimeoutRef.current) {
@@ -218,60 +314,6 @@ export default function Leaderboard() {
       setLandedPlayNumber(null);
     };
   }, []);
-
-  // Step the animating row upward one position at a time (no score changes)
-  useEffect(() => {
-    if (!animatingEntry) return;
-    const pn = animatingEntry.playNumber;
-    const sorted = leaderboardScores.slice().sort((a, b) => b.score - a.score);
-    const targetIndex = sorted.findIndex((e) => e.playNumber === pn);
-    const stepDelay = 220; // ms per row jump
-    let cancelled = false;
-
-    const doStep = () => {
-      if (cancelled) return;
-      setRenderOrder((prev) => {
-        const curr = prev.indexOf(pn);
-        if (curr <= targetIndex) {
-          // reached target or above — finish
-          if (targetIndex === 0) {
-            // celebrate first place
-            setShowConfetti(true);
-          }
-          // mark this play number as 'landed' to trigger a finished animation
-          setLandedPlayNumber(pn);
-          if (landingTimeoutRef.current)
-            window.clearTimeout(landingTimeoutRef.current);
-          landingTimeoutRef.current = window.setTimeout(() => {
-            setLandedPlayNumber(null);
-            landingTimeoutRef.current = null;
-          }, 900);
-          // clear animating flag
-          setAnimatingEntry(null);
-          // remove the blue highlight; if the row is top-3 the rank styles will apply
-          setHighlightedPlayNumber(null);
-          return prev;
-        }
-        const copy = prev.filter((p) => p !== pn);
-        copy.splice(curr - 1, 0, pn);
-        return copy;
-      });
-      // schedule next jump
-      animStepRef.current = window.setTimeout(doStep, stepDelay);
-    };
-
-    // start stepping (first step after a short interval to let FLIP settle)
-    animStepRef.current = window.setTimeout(doStep, 80);
-
-    return () => {
-      cancelled = true;
-      if (animStepRef.current) {
-        window.clearTimeout(animStepRef.current);
-        animStepRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animatingEntry]);
 
   function formatAchieved(ts: number | null | undefined) {
     if (!ts) return "";
@@ -315,11 +357,22 @@ export default function Leaderboard() {
   const renderedItems = renderOrder.map((pn, idx) => {
     const entry = leaderboardScores.find((e) => e.playNumber === pn)!;
     return (
-      <li
+      <motion.li
+        layout
+        initial={false}
+        transition={{
+          layout: {
+            type: "tween",
+            duration: 2,
+            ease: [0.45, 0, 0.15, 1], // Stronger ease in, smooth ease out
+          },
+        }}
         data-play-number={entry.playNumber}
         className={`leaderboard-item rank-${idx + 1} ${
           highlightedPlayNumber === entry.playNumber ? "animating" : ""
-        } ${landedPlayNumber === entry.playNumber ? "landed" : ""}`}
+        } ${landedPlayNumber === entry.playNumber ? "landed" : ""} ${
+          mostRecentPlayNumber === entry.playNumber ? "most-recent" : ""
+        }`}
         key={entry.playNumber}
       >
         <span className="score-label">
@@ -388,7 +441,7 @@ export default function Leaderboard() {
         <span className="score-value">
           {displayedScores[entry.playNumber] ?? entry.score}
         </span>
-      </li>
+      </motion.li>
     );
   });
 
@@ -403,25 +456,42 @@ export default function Leaderboard() {
         <LeaderboardLoadingSkeleton />
       ) : leaderboardScores.length > 0 ? (
         <>
-          <div className="leaderboard-card">
-            <h2>Your Total Scores</h2>
-            <hr className="leaderboard-divider" />
-            <ul ref={listRef} className="leaderboard-list">
-              {/** Display ordered by highest score, but show the original play number. */}
-              {renderedItems}
-            </ul>
-          </div>
+          <Card className="rounded-xl">
+            <div className="leaderboard-card">
+              <h2>Your Total Scores</h2>
+              <hr className="leaderboard-divider" />
+              <div className="leaderboard-list-wrapper">
+                <ul ref={listRef} className="leaderboard-list">
+                  {/** Display ordered by highest score, but show the original play number. */}
+                  {renderedItems}
+                </ul>
+                <ProgressiveBlur position="bottom" height="20%" />
+              </div>
+            </div>
+          </Card>
           <div className="leaderboard-actions" aria-hidden={false}>
             <button
-              className="leaderboard-tryagain"
+              className="leaderboard-home"
               onClick={() => router.push("/")}
-              title="Try Again"
+              title="Home"
             >
-              Try Again
-              <span className="retry-icon" aria-hidden>
-                <FontAwesomeIcon icon={faRotateRight} />
+              <span className="home-icon" aria-hidden>
+                <FontAwesomeIcon icon={faHome} />
               </span>
+              Home
             </button>
+            {fromPlay && (
+              <button
+                className="leaderboard-tryagain"
+                onClick={() => router.push("/play")}
+                title="Try Again"
+              >
+                Try Again
+                <span className="retry-icon" aria-hidden>
+                  <FontAwesomeIcon icon={faRotateRight} />
+                </span>
+              </button>
+            )}
           </div>
         </>
       ) : (
