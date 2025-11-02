@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { ContactEmailTemplate } from "@/components/ContactEmailTemplate";
+import React from "react";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -22,7 +23,11 @@ export async function POST(req: NextRequest) {
       to: ["19peytonsmith@gmail.com"],
       replyTo: email,
       subject: `New Contact Form Submission from ${name}`,
-      react: ContactEmailTemplate({ name, email, message }),
+      react: React.createElement(ContactEmailTemplate, {
+        name,
+        email,
+        message,
+      }) as React.ReactElement,
     });
 
     if (error) {

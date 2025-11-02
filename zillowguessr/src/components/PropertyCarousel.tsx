@@ -96,6 +96,7 @@ export default function PropertyCarousel({
       {/* Preload only the 5 visible images (first 3 and last 2) */}
       <div className="absolute left-[-9999px] top-[-9999px]">
         {visibleUrls.map((url, idx) => (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             key={`preload-${idx}`}
             src={url}

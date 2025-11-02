@@ -13,7 +13,7 @@ import { faRotateRight, faHome } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "./Confetti";
 import { Card } from "./Card";
 import { ProgressiveBlur } from "./ProgressiveBlur";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function Leaderboard() {
   type Entry = { score: number; playNumber: number; ts?: number | null };
@@ -250,11 +250,6 @@ export default function Leaderboard() {
     const startTime = Date.now();
     let rafId: number;
 
-    // Easing function to match the animation (ease in and ease out)
-    const easeInOutCubic = (t: number): number => {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    };
-
     const trackElement = () => {
       const elapsed = Date.now() - startTime;
 
@@ -276,9 +271,6 @@ export default function Leaderboard() {
       const targetScroll = itemTop - listHeight / 2 + itemHeight / 2;
       const currentScroll = list.scrollTop;
       const distance = targetScroll - currentScroll;
-
-      // Use easing to match animation timing
-      const easedProgress = easeInOutCubic(progress);
 
       // Smoothly interpolate to keep item centered
       list.scrollTop = currentScroll + distance * 0.2;
