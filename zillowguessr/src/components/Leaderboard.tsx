@@ -530,12 +530,22 @@ export default function Leaderboard() {
           </div>
         </>
       ) : (
-        <div>
+        <div className="text-center">
           <p>No scores available. Play the game to see your scores!</p>
           <div className="leaderboard-actions" aria-hidden={false}>
             <button
-              className="leaderboard-tryagain"
+              className="leaderboard-home"
               onClick={() => router.push("/")}
+              title="Home"
+            >
+              <span className="home-icon" aria-hidden>
+                <FontAwesomeIcon icon={faHome} />
+              </span>
+              Home
+            </button>
+            <button
+              className="leaderboard-tryagain"
+              onClick={() => router.push("/play")}
               title="Play!"
             >
               Play!
