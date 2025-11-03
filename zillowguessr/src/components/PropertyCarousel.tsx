@@ -7,6 +7,7 @@ import "react-responsive-3d-carousel/dist/styles.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import { BlurFade } from "@/components/BlurFade";
+import { getProxiedImageUrl } from "@/lib/imageProxy";
 
 export default function PropertyCarousel({
   urls,
@@ -21,20 +22,26 @@ export default function PropertyCarousel({
   >(new Set());
   const [allImagesLoaded, setAllImagesLoaded] = React.useState(false);
 
+  // Convert all URLs to use proxy
+  const proxiedUrls = React.useMemo(
+    () => urls.map((url) => getProxiedImageUrl(url)),
+    [urls]
+  );
+
   // Get the initially visible URLs (first 3 and last 2)
   const visibleUrls = React.useMemo(() => {
-    if (urls.length <= 5) return urls;
+    if (proxiedUrls.length <= 5) return proxiedUrls;
     return [
-      ...urls.slice(0, 3), // First 3
-      ...urls.slice(urls.length - 2), // Last 2
+      ...proxiedUrls.slice(0, 3), // First 3
+      ...proxiedUrls.slice(proxiedUrls.length - 2), // Last 2
     ];
-  }, [urls]);
+  }, [proxiedUrls]);
 
   // Reset when URLs change
   React.useEffect(() => {
     setVisibleImagesLoaded(new Set());
     setAllImagesLoaded(false);
-  }, [urls]);
+  }, [proxiedUrls]);
 
   const handleVisibleImageLoad = React.useCallback((url: string) => {
     setVisibleImagesLoaded((prev) => {
@@ -61,11 +68,12 @@ export default function PropertyCarousel({
 
   const items = React.useMemo(
     () =>
-      urls.map((url, idx) => {
-        const isVisible = idx < 3 || idx >= urls.length - 2;
+      proxiedUrls.map((url, idx) => {
+        const isVisible = idx < 3 || idx >= proxiedUrls.length - 2;
+        const originalUrl = urls[idx]; // Use original URL for PhotoView
 
         return (
-          <PhotoView key={idx} src={url}>
+          <PhotoView key={idx} src={originalUrl}>
             <div className="relative w-full h-[300px]">
               <Image
                 src={url}
@@ -80,7 +88,7 @@ export default function PropertyCarousel({
           </PhotoView>
         );
       }),
-    [urls]
+    [proxiedUrls, urls]
   );
 
   const handleChange = React.useCallback(
