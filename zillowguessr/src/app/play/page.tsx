@@ -34,6 +34,7 @@ type PropertyInfo = {
   square_footage: string;
   address: string;
   city_state_zipcode: string;
+  id?: string;
   detailUrl?: string;
 };
 
@@ -155,7 +156,8 @@ export default function PlayPage() {
   const fetchPropertyInfo = async (
     index: number,
     maxAttempts = 20,
-    delayMs = 300
+    delayMs = 300,
+    excludes: string[] = []
   ): Promise<PropertyInfo | null> => {
     const isValid = (data: unknown): data is PropertyInfo => {
       const d = data as Partial<PropertyInfo> | null | undefined;
@@ -170,10 +172,17 @@ export default function PlayPage() {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const res = await fetch(
-          `/api/property_info?page=${index}&attempt=${attempt}`,
-          { cache: "no-store" }
-        );
+        const params = new URLSearchParams();
+        params.set("page", String(index));
+        params.set("attempt", String(attempt));
+        if (excludes.length > 0) {
+          // send as comma-separated string; backend expects `toExclude` for resampling
+          params.set("toExclude", excludes.join(","));
+        }
+
+        const res = await fetch(`/api/property_info?${params.toString()}`, {
+          cache: "no-store",
+        });
 
         if (!res.ok) {
           console.warn(
@@ -202,10 +211,12 @@ export default function PlayPage() {
   useEffect(() => {
     let isMounted = true;
     (async () => {
+      const localUsedIds: string[] = [];
       for (let i = 0; i < ROUNDS; i++) {
-        const data = await fetchPropertyInfo(i, 20, 300);
+        const data = await fetchPropertyInfo(i, 20, 300, localUsedIds);
         if (data && isMounted) {
           setPropertyDataQueue((prev) => [...prev, data]);
+          if (data.id) localUsedIds.push(data.id);
         } else {
           console.error(`Could not load property for round ${i}`);
         }
