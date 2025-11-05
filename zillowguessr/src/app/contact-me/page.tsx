@@ -119,14 +119,17 @@ export default function ContactMe() {
             hear from you!
           </p>
           {sendSuccess && (
-            <div className="alert alert-success">
+            <div className="alert alert-success text-center">
               ✅ Message sent successfully! Thanks for your feedback!
             </div>
           )}
           {sendError && (
-            <div className="alert alert-danger">
+            <div className="alert alert-danger text-center">
               ❌ Failed to send message. Please try again or email me directly
-              at 19peytonsmith@gmail.com
+              at{" "}
+              <a href="mailto:19peytonsmith@gmail.com">
+                19peytonsmith@gmail.com
+              </a>
             </div>
           )}
           <form onSubmit={handleSubmit} noValidate>
