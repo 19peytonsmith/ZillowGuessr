@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useTheme } from "next-themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faQuestion,
@@ -13,7 +12,6 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { Particles } from "@/components/Particles";
 import HouseSlideshow from "@/components/HouseSlideshow";
 
 export default function SplashPage() {
@@ -21,15 +19,6 @@ export default function SplashPage() {
   const [showWhat, setShowWhat] = useState(false);
   const [isLoadingPlay, setIsLoadingPlay] = useState(false);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
-  const { theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const currentTheme = mounted ? resolvedTheme || theme : "light";
-  const color = currentTheme === "dark" ? "#ffffff" : "#000000";
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -55,13 +44,6 @@ export default function SplashPage() {
   return (
     <div className="splash-wrap overflow-hidden">
       <div className="main-content splash-hero p-5 mx-auto relative text-center">
-        <Particles
-          className="particles-background absolute inset-0 w-full h-full pointer-events-none"
-          quantity={100}
-          ease={80}
-          color={color}
-          refresh
-        />
         <HouseSlideshow />
 
         <div className="flex justify-between items-center gap-2 relative z-10">
@@ -98,7 +80,10 @@ export default function SplashPage() {
           <h1 className="splash-title">ZillowGuessr</h1>
         </div>
 
-        <p className="splash-lead relative z-10">
+        <p
+          className="splash-lead relative z-10 bg-black/25 text-white rounded-lg px-4 py-3 max-w-3xl mx-auto"
+          style={{ textShadow: "none" }}
+        >
           ZillowGuessr is a GeoGuessr-inspired game where you&apos;re shown 5
           random homes — complete with photos and details — and your challenge
           is simple: guess the price!
@@ -145,7 +130,7 @@ export default function SplashPage() {
           <div className="links flex gap-2 items-center">
             <a
               className="icon-link theme-like backdrop-blur-xs"
-              href="https://github.com/19peytonsmith/zillowguessr-v2"
+              href="https://github.com/19peytonsmith/ZillowGuessr"
               target="_blank"
               rel="noreferrer noopener"
               aria-label="GitHub repository link"
@@ -156,7 +141,7 @@ export default function SplashPage() {
 
             <a
               className="energy-btn backdrop-blur-xs"
-              href="https://www.buymeacoffee.com/19peytonsmith"
+              href="https://ko-fi.com/19peytonsmith"
               target="_blank"
               rel="noreferrer noopener"
               aria-label="Buy me an Energy Drink (tips)"
@@ -205,27 +190,28 @@ export default function SplashPage() {
                   <p>
                     ZillowGuessr is a small, educational project that shows a
                     set of publicly listed homes and asks players to guess their
-                    listed price. The homes displayed are discovered by a
-                    server-side process that programmatically collects publicly
-                    available listing pages and extracts images and basic
-                    metadata.
+                    listed price. The homes displayed are gathered by a
+                    background service that continuously finds public listing
+                    pages and saves images and basic listing details to a pool
+                    of examples the game can use.
                   </p>
                   <h3>How are homes selected?</h3>
                   <p>
-                    Homes are gathered from public listing pages using automated
-                    scraping tools. The scraper visits publicly accessible pages
-                    and extracts photos and non-sensitive listing details. The
-                    selection is randomized from the collected pool so each
-                    session shows a variety of properties.
+                    A background job continually adds publicly available
+                    listings to a shared pool. When you play, the game picks
+                    randomly from that pool so each session shows a variety of
+                    properties — no single listing is tracked just for the game.
                   </p>
                   <h3>Data sources & cadence</h3>
                   <p>
                     The project uses publicly available listing pages as its
-                    source. Scraping runs periodically to refresh the pool of
-                    properties; it does not continuously monitor a single
-                    listing. Because listings and prices are frequently updated,
-                    game data may not reflect the most recent changes on the
-                    original listing sites.
+                    source. A background job runs continuously to discover and
+                    refresh listings for the pool; the game then samples from
+                    that pool at play time. Because listings and prices are
+                    frequently updated, game data may not reflect the most
+                    recent changes on the original listing sites. If you notice
+                    a listing in the game that no longer exists, please let me
+                    know and I will remove it from the pool.
                   </p>
                   <h3>Privacy & disclaimers</h3>
                   <p>

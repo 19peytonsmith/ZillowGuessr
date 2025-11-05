@@ -29,6 +29,8 @@ export default function PropertyCarousel({
   );
 
   // Get the initially visible URLs (first 3 and last 2)
+  // We do this because the carousel shows 5 images at a time
+  // and we want to prioritize loading the initial ones first
   const visibleUrls = React.useMemo(() => {
     if (proxiedUrls.length <= 5) return proxiedUrls;
     return [
@@ -131,7 +133,7 @@ export default function PropertyCarousel({
         <BlurFade
           delay={0}
           inView={false}
-          duration={2}
+          duration={1}
           blur="8px"
           direction="up"
           offset={12}

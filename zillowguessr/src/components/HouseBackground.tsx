@@ -36,7 +36,7 @@ export default function HouseBackground({
   zIndex = 0,
   tintLight = "rgba(0,0,0,0.5)",
   tintDark = "rgba(255,255,255,0.5)",
-  minViewport = 1000,
+  minViewport = 768,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);

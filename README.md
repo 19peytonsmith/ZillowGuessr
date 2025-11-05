@@ -1,12 +1,10 @@
 # ZillowGuessr
 
-ZillowGuessr is a small Next.js web app that turns browsing Zillow listings into a guessing game: players try to guess listing prices and compete on leaderboards. It's built with Next.js (React), Material UI, Bootstrap, and some lightweight components for property carousels and sliders. The repository contains the web frontend and a minimal API route used by the app.
+ZillowGuessr is a small Next.js web app that turns browsing Zillow listings into a guessing game: players try to guess listing prices and compete on leaderboards. It's built with Next.js (React), Material UI, Bootstrap, Tailwind, and some lightweight components, both internally-made and externally-sourced. The repository contains the web frontend and a minimal API route used by the app.
 
-This README covers how to run the project in development using Docker Compose (recommended) or locally with Node.
+## Production Site
 
-## Production demo
-
-Play it at: [https://zillowguessr.vercel.app/](https://zillowguessr.vercel.app/) (custom domain coming soon!)
+Now officially released at [https://zillowguessr.com/](https://zillowguessr.com/)!
 
 ## Quick overview
 

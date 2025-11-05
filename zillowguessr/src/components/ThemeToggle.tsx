@@ -1,62 +1,22 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const toggle = useCallback(async () => {
-    if (!buttonRef.current) {
-      setTheme(theme === "light" ? "dark" : "light");
-      return;
-    }
-
-    // Check if view transitions are supported
-    if (!document.startViewTransition) {
-      setTheme(theme === "light" ? "dark" : "light");
-      return;
-    }
-
-    const newTheme = theme === "light" ? "dark" : "light";
-
-    await document.startViewTransition(() => {
-      setTheme(newTheme);
-    }).ready;
-
-    const { top, left, width, height } =
-      buttonRef.current.getBoundingClientRect();
-    const x = left + width / 2;
-    const y = top + height / 2;
-    const maxRadius = Math.hypot(
-      Math.max(left, window.innerWidth - left),
-      Math.max(top, window.innerHeight - top)
-    );
-
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${maxRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 400,
-        easing: "ease-in-out",
-        pseudoElement: "::view-transition-new(root)",
-      }
-    );
+  const toggle = useCallback(() => {
+    setTheme(theme === "light" ? "dark" : "light");
   }, [theme, setTheme]);
 
   return (
     <button
-      ref={buttonRef}
       role="switch"
       aria-checked={theme === "dark"}
       aria-label={

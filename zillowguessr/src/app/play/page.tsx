@@ -19,8 +19,6 @@ import {
   faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Particles } from "@/components/Particles";
-import { useTheme } from "next-themes";
 import "@/styles/app.css";
 import "@/styles/leaderboard.css";
 
@@ -40,17 +38,8 @@ type PropertyInfo = {
 
 export default function PlayPage() {
   const router = useRouter();
-  const { theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState<boolean>(false);
   const [showMap, setShowMap] = useState<boolean>(false);
   const DEFAULT_MAP_ZOOM = 8;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const currentTheme = mounted ? resolvedTheme || theme : "light";
-  const particleColor = currentTheme === "dark" ? "#ffffff" : "#000000";
 
   const [propertyDataQueue, setPropertyDataQueue] = useState<PropertyInfo[]>(
     []
@@ -341,8 +330,23 @@ export default function PlayPage() {
 
   const handleGetResults = () => {
     setIsLoadingResults(true);
-    const stored = Cookies.get("leaderboardScores");
-    const existingRaw = stored ? JSON.parse(stored) : [];
+    // Use localStorage rather than cookies to avoid per-cookie size limits
+    let existingRaw: unknown = [];
+    if (typeof window !== "undefined") {
+      try {
+        const raw =
+          localStorage.getItem("leaderboardScores") ||
+          Cookies.get("leaderboardScores");
+        existingRaw = raw ? JSON.parse(raw) : [];
+      } catch (err) {
+        console.warn(
+          "Failed to parse stored leaderboard data, starting fresh",
+          err
+        );
+        existingRaw = [];
+      }
+    }
+
     const existing = Array.isArray(existingRaw)
       ? (existingRaw
           .map((it: unknown) => {
@@ -360,7 +364,17 @@ export default function PlayPage() {
 
     const updated = [...existing, { score: total, ts: Date.now() }];
 
-    Cookies.set("leaderboardScores", JSON.stringify(updated), { expires: 7 });
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("leaderboardScores", JSON.stringify(updated));
+      } catch (err) {
+        // localStorage can throw in some privacy modes; fall back to cookies
+        console.warn("localStorage unavailable, falling back to cookies", err);
+        Cookies.set("leaderboardScores", JSON.stringify(updated), {
+          expires: 7,
+        });
+      }
+    }
 
     router.push("/leaderboards?fromPlay=true");
   };
@@ -413,13 +427,6 @@ export default function PlayPage() {
       <Confetti active={showConfetti} duration={3000} />
       {currentData ? (
         <div className="main-content p-4 mx-auto relative bg-[var(--card-bg)]">
-          <Particles
-            className="absolute inset-0 -z-10"
-            quantity={50}
-            ease={80}
-            color={particleColor}
-            refresh
-          />
           <div className="play-page-header flex justify-between items-center mb-1">
             <h1 className="my-0">{currentData.address}</h1>
             <div className="flex items-center gap-2">

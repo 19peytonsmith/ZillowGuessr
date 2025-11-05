@@ -113,9 +113,10 @@ export default function ContactMe() {
         <div className="contact-card">
           <h2>Feedback & Suggestions</h2>
           <hr className="contact-divider" />
-          <p className="contact-description">
-            Have tips or suggestions to improve the game? Found a bug or have
-            feedback? I&apos;d love to hear from you!
+          <p className="contact-description" style={{ fontSize: "0.9rem" }}>
+            Have tips or suggestions to improve the game or found a bug? Want to
+            have houses from your city featured in the game. I&apos;d love to
+            hear from you!
           </p>
           {sendSuccess && (
             <div className="alert alert-success">

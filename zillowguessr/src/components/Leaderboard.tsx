@@ -12,7 +12,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateRight, faHome } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "./Confetti";
 import { Card } from "./Card";
-import { ProgressiveBlur } from "./ProgressiveBlur";
 import { motion } from "framer-motion";
 
 export default function Leaderboard() {
@@ -39,8 +38,6 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const loadStartRef = useRef<number | null>(null);
   const minLoadingRef = useRef<number | null>(null);
-
-  const [hasScrollbar, setHasScrollbar] = useState<boolean>(false);
 
   // Touch / tooltip handling: on touch devices we prefer click-to-toggle tooltips
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
@@ -76,10 +73,18 @@ export default function Leaderboard() {
     setLoading(true);
     loadStartRef.current = Date.now();
     const t = window.setTimeout(() => {
-      const scoresFromCookie = Cookies.get("leaderboardScores");
-      if (scoresFromCookie) {
+      // Prefer localStorage (much larger), fall back to cookie for compatibility
+      let raw: string | undefined | null = null;
+      try {
+        raw = localStorage.getItem("leaderboardScores");
+      } catch {
+        // localStorage may be unavailable in some privacy modes; fall back to cookie
+        raw = Cookies.get("leaderboardScores");
+      }
+
+      if (raw) {
         try {
-          const parsed = JSON.parse(scoresFromCookie);
+          const parsed = JSON.parse(raw);
           // parsed may be an array of numbers (legacy) or array of objects { score, ts }
           // We assume it's chronological (oldest first). Map to Entry array preserving playNumber.
           const entries: Entry[] = Array.isArray(parsed)
@@ -137,28 +142,6 @@ export default function Leaderboard() {
       }
     };
   }, []);
-
-  // Check if the list has a scrollbar
-  useEffect(() => {
-    if (!listRef.current) return;
-
-    const checkScrollbar = () => {
-      if (!listRef.current) return;
-      const hasScroll =
-        listRef.current.scrollHeight > listRef.current.clientHeight;
-      setHasScrollbar(hasScroll);
-    };
-
-    checkScrollbar();
-
-    // Recheck when window resizes or content changes
-    const resizeObserver = new ResizeObserver(checkScrollbar);
-    resizeObserver.observe(listRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [leaderboardScores, renderOrder]);
 
   // When leaderboardScores change, determine if we should animate the last entry
   useEffect(() => {
@@ -498,9 +481,6 @@ export default function Leaderboard() {
                   {/** Display ordered by highest score, but show the original play number. */}
                   {renderedItems}
                 </ul>
-                {hasScrollbar && (
-                  <ProgressiveBlur position="bottom" height="20%" />
-                )}
               </div>
             </div>
           </Card>
