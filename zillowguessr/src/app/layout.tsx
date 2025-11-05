@@ -7,6 +7,7 @@ import "../styles/main.css";
 import HouseBackground from "@/components/HouseBackground";
 import GridBackground from "@/components/GridBackground";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 const lexendExa = Lexend_Exa({
   variable: "--font-lexend-exa",
@@ -39,6 +40,7 @@ export default function RootLayout({
             baseOpacity={0.04}
           />
           <main className="relative z-10">{children}</main>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
