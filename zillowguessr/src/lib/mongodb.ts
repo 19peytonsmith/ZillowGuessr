@@ -4,12 +4,6 @@ import { MongoClient, Db } from "mongodb";
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB || "zillow-webscraper";
 
-if (!MONGODB_URI) {
-  console.warn(
-    "MONGODB_URI is not set. Database access will fail until it's provided."
-  );
-}
-
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
