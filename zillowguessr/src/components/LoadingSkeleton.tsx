@@ -40,6 +40,16 @@ export default function LoadingSkeleton() {
         <div className="skeleton carousel-right-right" />
       </div>
 
+      {/* Mobile thumbnail skeletons (visible on small screens) */}
+      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2 md:hidden">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="skeleton flex-shrink-0 w-20 h-14 rounded-md"
+          />
+        ))}
+      </div>
+
       <div className="mt-3">
         <div className="skeleton skeleton-slider" />
         <div className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:justify-end">
