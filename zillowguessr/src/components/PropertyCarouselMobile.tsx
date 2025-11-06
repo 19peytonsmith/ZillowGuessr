@@ -57,10 +57,16 @@ export default function PropertyCarouselMobile({
   React.useEffect(() => {
     const container = thumbsRef.current;
     if (!container) return;
-    const active = container.querySelector(`[data-thumb-index=\"${index}\"]`) as HTMLElement | null;
+    const active = container.querySelector(
+      `[data-thumb-index=\"${index}\"]`
+    ) as HTMLElement | null;
     if (active) {
       // use smooth scrolling so it follows the main carousel animation
-      active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      active.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
     }
   }, [index]);
 
@@ -190,7 +196,10 @@ export default function PropertyCarouselMobile({
 
         {/* Thumbnails */}
         {urls.length > 1 && (
-          <div ref={thumbsRef} className="mt-3 flex items-center gap-2 overflow-x-auto pb-2">
+          <div
+            ref={thumbsRef}
+            className="mt-3 flex items-center gap-2 overflow-x-auto pb-2"
+          >
             {proxied.map((p, i) => (
               <button
                 key={i}
