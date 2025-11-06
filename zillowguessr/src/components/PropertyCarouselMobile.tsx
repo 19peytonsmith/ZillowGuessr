@@ -5,7 +5,7 @@ import Image from "next/image";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import { getProxiedImageUrl } from "@/lib/imageProxy";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function PropertyCarouselMobile({
   urls,
@@ -30,15 +30,11 @@ export default function PropertyCarouselMobile({
     [urls]
   );
 
-  const [animDir, setAnimDir] = React.useState(0);
-
   const prev = React.useCallback(() => {
-    setAnimDir(-1);
     setIndex((i) => (i - 1 + urls.length) % Math.max(1, urls.length));
   }, [urls.length]);
 
   const next = React.useCallback(() => {
-    setAnimDir(1);
     setIndex((i) => (i + 1) % Math.max(1, urls.length));
   }, [urls.length]);
 
@@ -51,6 +47,14 @@ export default function PropertyCarouselMobile({
     return <div className="w-full h-[300px] bg-[var(--card-bg)] rounded-md" />;
   }
 
+  // compute translate value so it's relative to the motion div's width.
+  // motionDivWidth = count * 100% of parent, so translating by parent widths
+  // requires converting index to a percent of the motion div: (index / count)*100%.
+  const slideX = React.useMemo(() => {
+    const count = proxied.length || 1;
+    return `-${(index / count) * 100}%`;
+  }, [index, proxied.length]);
+
   return (
     <PhotoProvider>
       <div className="relative w-full">
@@ -61,65 +65,67 @@ export default function PropertyCarouselMobile({
               {`${index + 1}/${urls.length}`}
             </div>
           </div>
-          {/* Main image gallery: render a PhotoView for every image so the lightbox
-              has access to the full gallery (prevents 1/1 issue). Only the current
-              image shows the visible button and content. */}
-          {proxied.map((p, i) => (
-            <PhotoView key={i} src={urls[i]}>
-              <div
-                className={`${i === index ? "block" : "hidden"} w-full h-full`}
-              >
-                <button
-                  aria-label={`Open image ${i + 1}`}
-                  className="w-full h-full p-0 m-0 block"
-                  style={{ background: "transparent", border: 0 }}
-                  onTouchStart={(e) => {
-                    const t = e.touches[0];
-                    touchStartX.current = t.clientX;
-                    touchStartY.current = t.clientY;
-                    touchMoved.current = false;
-                  }}
-                  onTouchMove={(e) => {
-                    const t = e.touches[0];
-                    const dx = t.clientX - (touchStartX.current ?? 0);
-                    const dy = t.clientY - (touchStartY.current ?? 0);
-                    if (Math.abs(dx) > 10 && Math.abs(dy) < 100) {
-                      touchMoved.current = true;
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    const lastTouch = e.changedTouches[0];
-                    const startX = touchStartX.current ?? 0;
-                    const startY = touchStartY.current ?? 0;
-                    const dx = lastTouch.clientX - startX;
-                    const dy = lastTouch.clientY - startY;
-                    const THRESHOLD = 50; // px
-                    if (Math.abs(dx) > THRESHOLD && Math.abs(dy) < 120) {
-                      if (dx > 0) prev();
-                      else next();
-                    }
-                    touchStartX.current = null;
-                    touchStartY.current = null;
-                  }}
-                  onClick={(e) => {
-                    if (touchMoved.current) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      touchMoved.current = false;
-                    }
-                  }}
-                >
-                  <AnimatePresence initial={false} custom={animDir}>
-                    {i === index && (
-                      <motion.div
-                        key={index}
-                        custom={animDir}
-                        initial={{ x: animDir * 100, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -animDir * 100, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="w-full h-full relative"
-                      >
+          {/* Sliding gallery: place all images in a single flex row and translate
+              the row using Framer Motion. This avoids unmount/remount flashes and
+              makes transitions smoother when swiping quickly. */}
+          <div
+            className="w-full h-full overflow-hidden relative"
+            onTouchStart={(e) => {
+              const t = e.touches[0];
+              touchStartX.current = t.clientX;
+              touchStartY.current = t.clientY;
+              touchMoved.current = false;
+            }}
+            onTouchMove={(e) => {
+              const t = e.touches[0];
+              const dx = t.clientX - (touchStartX.current ?? 0);
+              const dy = t.clientY - (touchStartY.current ?? 0);
+              if (Math.abs(dx) > 10 && Math.abs(dy) < 100) {
+                touchMoved.current = true;
+              }
+            }}
+            onTouchEnd={(e) => {
+              const lastTouch = e.changedTouches[0];
+              const startX = touchStartX.current ?? 0;
+              const startY = touchStartY.current ?? 0;
+              const dx = lastTouch.clientX - startX;
+              const dy = lastTouch.clientY - startY;
+              const THRESHOLD = 50; // px
+              if (Math.abs(dx) > THRESHOLD && Math.abs(dy) < 120) {
+                if (dx > 0) prev();
+                else next();
+              }
+              touchStartX.current = null;
+              touchStartY.current = null;
+            }}
+          >
+            <motion.div
+              className="h-full flex"
+              style={{ width: `${proxied.length * 100}%` }}
+              // animate to a translation that's a percent of this element's own width
+              // so one index moves exactly one parent-width.
+              animate={{ x: slideX }}
+              transition={{ duration: 0.28, ease: [0.22, 0.8, 0.2, 1] }}
+            >
+              {proxied.map((p, i) => (
+                <PhotoView key={i} src={urls[i]}>
+                  <div
+                    className="w-full h-full relative flex-shrink-0"
+                    style={{ width: `${100 / Math.max(1, proxied.length)}%` }}
+                  >
+                    <button
+                      aria-label={`Open image ${i + 1}`}
+                      className="w-full h-full p-0 m-0 block"
+                      style={{ background: "transparent", border: 0 }}
+                      onClick={(e) => {
+                        if (touchMoved.current) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          touchMoved.current = false;
+                        }
+                      }}
+                    >
+                      <div className="w-full h-full relative">
                         <Image
                           src={p}
                           alt={`Property image ${i + 1}`}
@@ -128,13 +134,13 @@ export default function PropertyCarouselMobile({
                           priority={i === 0}
                           className="object-cover"
                         />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </button>
-              </div>
-            </PhotoView>
-          ))}
+                      </div>
+                    </button>
+                  </div>
+                </PhotoView>
+              ))}
+            </motion.div>
+          </div>
 
           {/* Prev / Next buttons */}
           {urls.length > 1 && (
