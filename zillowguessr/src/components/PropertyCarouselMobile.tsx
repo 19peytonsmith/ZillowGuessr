@@ -25,8 +25,9 @@ export default function PropertyCarouselMobile({
     onChangeIndex?.(index);
   }, [index, onChangeIndex]);
 
+  // make proxied safe if `urls` is undefined by defaulting to an empty array
   const proxied = React.useMemo(
-    () => urls.map((u) => getProxiedImageUrl(u)),
+    () => (urls ?? []).map((u) => getProxiedImageUrl(u)),
     [urls]
   );
 
@@ -42,11 +43,6 @@ export default function PropertyCarouselMobile({
   const touchStartX = React.useRef<number | null>(null);
   const touchStartY = React.useRef<number | null>(null);
   const touchMoved = React.useRef(false);
-
-  if (!urls || urls.length === 0) {
-    return <div className="w-full h-[300px] bg-[var(--card-bg)] rounded-md" />;
-  }
-
   // compute translate value so it's relative to the motion div's width.
   // motionDivWidth = count * 100% of parent, so translating by parent widths
   // requires converting index to a percent of the motion div: (index / count)*100%.
@@ -54,6 +50,10 @@ export default function PropertyCarouselMobile({
     const count = proxied.length || 1;
     return `-${(index / count) * 100}%`;
   }, [index, proxied.length]);
+
+  if (!urls || urls.length === 0) {
+    return <div className="w-full h-[300px] bg-[var(--card-bg)] rounded-md" />;
+  }
 
   return (
     <PhotoProvider>
