@@ -43,6 +43,8 @@ export default function PropertyCarouselMobile({
   const touchStartX = React.useRef<number | null>(null);
   const touchStartY = React.useRef<number | null>(null);
   const touchMoved = React.useRef(false);
+  // ref for thumbnails container so we can scroll the active thumb into view
+  const thumbsRef = React.useRef<HTMLDivElement | null>(null);
   // compute translate value so it's relative to the motion div's width.
   // motionDivWidth = count * 100% of parent, so translating by parent widths
   // requires converting index to a percent of the motion div: (index / count)*100%.
@@ -50,6 +52,17 @@ export default function PropertyCarouselMobile({
     const count = proxied.length || 1;
     return `-${(index / count) * 100}%`;
   }, [index, proxied.length]);
+
+  // keep thumbnails scrolled to the active index when index changes
+  React.useEffect(() => {
+    const container = thumbsRef.current;
+    if (!container) return;
+    const active = container.querySelector(`[data-thumb-index=\"${index}\"]`) as HTMLElement | null;
+    if (active) {
+      // use smooth scrolling so it follows the main carousel animation
+      active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [index]);
 
   if (!urls || urls.length === 0) {
     return <div className="w-full h-[300px] bg-[var(--card-bg)] rounded-md" />;
@@ -177,12 +190,14 @@ export default function PropertyCarouselMobile({
 
         {/* Thumbnails */}
         {urls.length > 1 && (
-          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2">
+          <div ref={thumbsRef} className="mt-3 flex items-center gap-2 overflow-x-auto pb-2">
             {proxied.map((p, i) => (
               <button
                 key={i}
+                data-thumb-index={i}
                 onClick={() => setIndex(i)}
                 aria-label={`Show image ${i + 1}`}
+                aria-current={i === index}
                 className={`flex-shrink-0 rounded-md overflow-hidden border-2 ${i === index ? "border-[var(--btn-primary)]" : "border-transparent"}`}
                 style={{ width: 80, height: 60 }}
               >
