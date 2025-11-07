@@ -7,6 +7,7 @@ type ScoreDoc = {
   ts: number;
   durationMs?: number | null;
   clientId?: string | null;
+  _id?: ObjectId;
 };
 
 export async function GET(
@@ -38,7 +39,7 @@ export async function GET(
       ts: doc.ts,
       durationMs: doc.durationMs ?? null,
       clientId: doc.clientId ?? null,
-      _id: doc && (doc as any)._id?.toString?.(),
+      _id: doc._id?.toString?.() ?? null,
     });
   } catch (err) {
     console.error("GET /api/scores/[id] error", err);
