@@ -111,7 +111,7 @@ export default function ContactMe() {
       </div>
       <Card className="rounded-xl">
         <div className="contact-card">
-          <h2>Feedback & Suggestions</h2>
+          <h2 className="card-title">Feedback & Suggestions</h2>
           <hr className="contact-divider" />
           <p className="contact-description" style={{ fontSize: "0.9rem" }}>
             Have tips or suggestions to improve the game or found a bug? Want to

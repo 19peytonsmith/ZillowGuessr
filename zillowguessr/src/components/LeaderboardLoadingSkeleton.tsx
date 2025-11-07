@@ -31,7 +31,7 @@ export default function LeaderboardLoadingSkeleton({ compact }: Props) {
   return (
     <Card className="rounded-xl">
       <div className="leaderboard-card">
-        <h2>Your Total Scores</h2>
+        <h2 className="card-title">Leaderboard</h2>
         <hr className="leaderboard-divider" />
         {list}
       </div>
