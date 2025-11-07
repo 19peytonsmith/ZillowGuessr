@@ -153,12 +153,12 @@ export default function PlayPage() {
         id = String(rand);
         try {
           localStorage.setItem(key, id);
-        } catch (e) {
+        } catch {
           // ignore
         }
       }
       setClientId(id);
-    } catch (err) {
+    } catch {
       // ignore storage errors
     }
 
@@ -180,7 +180,7 @@ export default function PlayPage() {
         timerRef.current = null;
       }
     };
-  }, []);
+  }, [currentIndex]);
 
   // Stop/finalize the timer when we hit the results state
   useEffect(() => {
@@ -195,7 +195,7 @@ export default function PlayPage() {
       }
       startTimeRef.current = null;
     }
-  }, [getResults]);
+  }, [getResults, elapsedMs]);
 
   // Orbitron font is imported via next/font/google (see top of file)
 
@@ -481,7 +481,6 @@ export default function PlayPage() {
         });
       } catch (err) {
         // don't block navigation; log to console for diagnostics
-        // eslint-disable-next-line no-console
         console.warn("Failed to persist global score", err);
       }
     })();

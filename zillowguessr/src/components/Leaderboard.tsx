@@ -64,14 +64,23 @@ export default function Leaderboard() {
         if (!isMounted) return;
         // data is array of { score, ts, durationMs, clientId }
         const entries: Entry[] = Array.isArray(data)
-          ? data.map((it: any) => ({
-              score: typeof it.score === "number" ? it.score : 0,
-              playNumber: 0, // will set after sorting
-              ts: typeof it.ts === "number" ? it.ts : null,
-              durationMs:
-                typeof it.durationMs === "number" ? it.durationMs : null,
-              clientId: typeof it.clientId === "string" ? it.clientId : null,
-            }))
+          ? data.map((it: unknown) => {
+              const obj = it as Record<string, unknown>;
+              return {
+                score:
+                  typeof obj.score === "number" ? (obj.score as number) : 0,
+                playNumber: 0, // will set after sorting
+                ts: typeof obj.ts === "number" ? (obj.ts as number) : null,
+                durationMs:
+                  typeof obj.durationMs === "number"
+                    ? (obj.durationMs as number)
+                    : null,
+                clientId:
+                  typeof obj.clientId === "string"
+                    ? (obj.clientId as string)
+                    : null,
+              };
+            })
           : [];
 
         // sort by score desc, tiebreaker = shortest duration
@@ -109,10 +118,11 @@ export default function Leaderboard() {
     try {
       const id = localStorage.getItem("zillow_clientId");
       setLocalClientId(id);
-    } catch (err) {
+    } catch {
       setLocalClientId(null);
     }
   }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
