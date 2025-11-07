@@ -699,7 +699,7 @@ export default function Leaderboard() {
                   </ul>
                 ) : (
                   <div className="text-center">
-                    <p>No global scores yet.</p>
+                    <p>No global scores yet, better be the first!</p>
                   </div>
                 )}
               </div>
