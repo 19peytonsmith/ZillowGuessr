@@ -33,8 +33,7 @@ html:not([data-theme="dark"]) .main-content.splash-hero {
 }
 
 /* Ensure all interactive content is above background elements */
-.main-content.splash-hero
-  > div:not(.house-background),
+.main-content.splash-hero > div:not(.house-background),
 .main-content.splash-hero > .house-background {
   position: relative;
   z-index: 10;
