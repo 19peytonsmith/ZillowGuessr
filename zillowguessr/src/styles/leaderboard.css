@@ -11,20 +11,6 @@
   padding: 16px;
 }
 
-.leaderboard-header {
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.leaderboard-header h1 {
-  margin: 0;
-}
-
 .leaderboard-card {
   padding: 20px;
   width: 100%;
@@ -33,14 +19,8 @@
 }
 
 .leaderboard-container > div:has(.leaderboard-card) {
-  max-width: 400px;
+  max-width: 600px;
   width: 100%;
-}
-
-@media (max-width: 768px) {
-  .leaderboard-container > div:has(.leaderboard-card) {
-    width: 95%;
-  }
 }
 
 .leaderboard-divider {
@@ -54,7 +34,7 @@
 .leaderboard-list-wrapper {
   position: relative;
   width: 100%;
-  max-height: 400px; /* reduced by 200px as requested */
+  max-height: 600px;
   overflow: visible; /* Allow glow to extend outside wrapper */
 }
 
@@ -129,7 +109,7 @@
   padding: 0 6px; /* Add horizontal padding to prevent glow cutoff */
   margin: 0;
   text-align: left;
-  max-height: 400px; /* reduced by 200px to shorten card height */
+  max-height: 600px;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;

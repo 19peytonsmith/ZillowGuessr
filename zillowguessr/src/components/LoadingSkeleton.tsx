@@ -6,11 +6,25 @@ export default function LoadingSkeleton() {
   return (
     <div className="main-content p-4 mx-auto bg-[var(--card-bg)]">
       {/* Header section */}
-      <div className="play-page-header flex justify-between items-center mb-1">
+      {/* Mobile: action buttons full-width above the address, spaced between */}
+      <div className="md:hidden mb-1">
+        <div className="flex w-full items-center justify-between mb-2">
+          <div className="skeleton w-9 h-9 rounded-md" aria-hidden />
+          <div className="skeleton w-[90px] h-8 rounded-lg" aria-hidden />
+          <div className="skeleton w-9 h-9 rounded-full" aria-hidden />
+        </div>
+        <div>
+          <div className="skeleton skeleton-title" />
+        </div>
+      </div>
+
+      {/* Desktop: address on left, action buttons on the right (same row) */}
+      <div className="hidden md:flex md:items-center md:justify-between mb-1">
         <div className="skeleton skeleton-title" />
         <div className="flex items-center gap-2">
-          <div className="skeleton w-[80px] h-8 rounded-lg" />
-          <div className="skeleton w-12 h-8 rounded-full" />
+          <div className="skeleton w-24 h-9 rounded-md" aria-hidden />
+          <div className="skeleton w-[90px] h-8 rounded-lg" aria-hidden />
+          <div className="skeleton w-9 h-9 rounded-full" aria-hidden />
         </div>
       </div>
 
@@ -24,13 +38,13 @@ export default function LoadingSkeleton() {
         </div>
       </div>
 
-      <hr />
-      <div className="flex justify-between items-center my-2">
+      <hr className="my-1 my-md-3" />
+      <div className="flex justify-between items-center">
         <div className="skeleton skeleton-score" />
         <div className="skeleton skeleton-show-map" />
       </div>
 
-      <hr className="mt-0" />
+      <hr className="my-1 my-md-3" />
 
       <div className="carousel-stack">
         <div className="skeleton carousel-left-left" />

@@ -80,10 +80,7 @@ export default function SplashPage() {
           <h1 className="splash-title">ZillowGuessr</h1>
         </div>
 
-        <p
-          className="splash-lead relative z-10 bg-black/25 text-white rounded-lg px-4 py-3 max-w-3xl mx-auto"
-          style={{ textShadow: "none" }}
-        >
+        <p className="splash-lead relative z-10 bg-black/25 text-white rounded-lg px-4 py-3 max-w-3xl mx-auto">
           ZillowGuessr is a GeoGuessr-inspired game where you&apos;re shown 5
           random homes — complete with photos and details — and your challenge
           is simple: guess the price!

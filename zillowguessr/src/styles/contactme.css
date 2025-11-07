@@ -16,12 +16,6 @@
   width: 100%;
 }
 
-@media (max-width: 768px) {
-  .contact-container > div:has(.contact-card) {
-    width: 95%;
-  }
-}
-
 .contact-card {
   padding: 20px;
   width: 100%;

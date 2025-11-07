@@ -148,14 +148,8 @@ export default function GridBackground({
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        zIndex,
-        pointerEvents: "none",
-      }}
+      className="fixed inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex }}
     />
   );
 }

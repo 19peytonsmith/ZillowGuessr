@@ -203,12 +203,8 @@ export default function HouseBackground({
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex,
-        pointerEvents: "none",
-      }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex }}
     />
   );
 }

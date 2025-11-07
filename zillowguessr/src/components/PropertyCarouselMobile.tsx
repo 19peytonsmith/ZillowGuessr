@@ -134,8 +134,7 @@ export default function PropertyCarouselMobile({
                   >
                     <button
                       aria-label={`Open image ${i + 1}`}
-                      className="w-full h-full p-0 m-0 block"
-                      style={{ background: "transparent", border: 0 }}
+                      className="w-full h-full p-0 m-0 block bg-transparent border-0"
                       onClick={(e) => {
                         if (touchMoved.current) {
                           e.preventDefault();
@@ -167,28 +166,16 @@ export default function PropertyCarouselMobile({
               <button
                 onClick={prev}
                 aria-label="Previous"
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 text-white rounded-full w-16 h-16 flex items-center justify-center bg-transparent"
-                style={{ lineHeight: 1 }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 text-white rounded-full w-16 h-16 flex items-center justify-center bg-transparent leading-none"
               >
-                <span
-                  className="text-5xl"
-                  style={{ display: "block", lineHeight: 1 }}
-                >
-                  ‹
-                </span>
+                <span className="text-5xl block leading-none">‹</span>
               </button>
               <button
                 onClick={next}
                 aria-label="Next"
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 text-white rounded-full w-16 h-16 flex items-center justify-center bg-transparent"
-                style={{ lineHeight: 1 }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 text-white rounded-full w-16 h-16 flex items-center justify-center bg-transparent leading-none"
               >
-                <span
-                  className="text-5xl"
-                  style={{ display: "block", lineHeight: 1 }}
-                >
-                  ›
-                </span>
+                <span className="text-5xl block leading-none">›</span>
               </button>
             </>
           )}
@@ -207,8 +194,7 @@ export default function PropertyCarouselMobile({
                 onClick={() => setIndex(i)}
                 aria-label={`Show image ${i + 1}`}
                 aria-current={i === index}
-                className={`flex-shrink-0 rounded-md overflow-hidden border-2 ${i === index ? "border-[var(--btn-primary)]" : "border-transparent"}`}
-                style={{ width: 80, height: 60 }}
+                className={`flex-shrink-0 rounded-md overflow-hidden border-2 ${i === index ? "border-[var(--btn-primary)]" : "border-transparent"} w-[80px] h-[60px]`}
               >
                 <Image
                   src={p}

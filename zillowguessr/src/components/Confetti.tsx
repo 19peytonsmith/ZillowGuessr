@@ -105,15 +105,7 @@ export default function Confetti({ active, duration = 3000 }: Props) {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 9999,
-      }}
+      className="fixed inset-0 w-full h-full pointer-events-none z-[9999]"
     />
   );
 }

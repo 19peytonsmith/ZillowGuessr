@@ -166,6 +166,7 @@ export default function PlayPage() {
   }, [currentIndex]);
 
   // Start the timer on page load (mount) and stop when results are ready
+  // NOTE: run once on mount so the timer continues across rounds
   useEffect(() => {
     // start immediately on mount
     startTimeRef.current = Date.now();
@@ -180,7 +181,7 @@ export default function PlayPage() {
         timerRef.current = null;
       }
     };
-  }, [currentIndex]);
+  }, []);
 
   // Stop/finalize the timer when we hit the results state
   useEffect(() => {
@@ -582,9 +583,9 @@ export default function PlayPage() {
             </div>
           </div>
 
-          <hr />
+          <hr className="my-1 my-md-3" />
           <div className="flex items-center justify-between">
-            <h5>
+            <h5 className="m-0">
               Score{" "}
               <span className="inline-flex items-center relative d-block d-sm-inline">
                 <span
@@ -642,24 +643,21 @@ export default function PlayPage() {
 
           {currentData.address ? (
             <div
-              className={`map-embed-container mt-3 ${
-                showMap ? "map-visible" : ""
-              }`}
+              className={`map-embed-container mt-0 mt-md-3 ${showMap ? "map-visible" : ""}`}
               id="property-map-embed"
             >
               <iframe
-                className="map-embed"
                 title={`Map for ${currentData.address}`}
                 src={`https://www.google.com/maps?q=${encodeURIComponent(
                   `${currentData.address}, ${currentData.city_state_zipcode}`
                 )}&z=${DEFAULT_MAP_ZOOM}&output=embed`}
-                style={{ border: 0 }}
+                className="map-embed border-0"
                 allowFullScreen
                 loading="lazy"
               />
             </div>
           ) : null}
-          <hr className="mt-0" />
+          <hr className="my-1 mb-md-3 mt-md-0" />
 
           <PropertyCarousel
             key={`round-${currentIndex}`}

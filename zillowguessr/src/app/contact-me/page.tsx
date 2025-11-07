@@ -113,7 +113,7 @@ export default function ContactMe() {
         <div className="contact-card">
           <h2 className="card-title">Feedback & Suggestions</h2>
           <hr className="contact-divider" />
-          <p className="contact-description" style={{ fontSize: "0.9rem" }}>
+          <p className="contact-description text-[0.9rem]">
             Have tips or suggestions to improve the game or found a bug? Want to
             have houses from your city featured in the game. I&apos;d love to
             hear from you!
