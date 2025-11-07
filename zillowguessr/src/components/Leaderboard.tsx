@@ -15,7 +15,14 @@ import { Card } from "./Card";
 import { motion } from "framer-motion";
 
 export default function Leaderboard() {
-  type Entry = { score: number; playNumber: number; ts?: number | null };
+  type Entry = {
+    score: number;
+    playNumber: number;
+    ts?: number | null;
+    durationMs?: number | null;
+    clientId?: string | null;
+  };
+  const [localClientId, setLocalClientId] = useState<string | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<Entry[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,6 +39,9 @@ export default function Leaderboard() {
   const [mostRecentPlayNumber, setMostRecentPlayNumber] = useState<
     number | null
   >(null);
+  const [activeTab, setActiveTab] = useState<"local" | "global">("local");
+  const [globalScores, setGlobalScores] = useState<Entry[] | null>(null);
+  const [globalLoading, setGlobalLoading] = useState<boolean>(false);
   const [animationDuration, setAnimationDuration] = useState<number>(2);
   const animationDelayRef = useRef<number | null>(null);
 
@@ -42,7 +52,67 @@ export default function Leaderboard() {
   // Touch / tooltip handling: on touch devices we prefer click-to-toggle tooltips
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
   const [openTooltipPlay, setOpenTooltipPlay] = useState<number | null>(null);
+  useEffect(() => {
+    if (activeTab !== "global") return;
+    let isMounted = true;
+    setGlobalLoading(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/scores");
+        if (!res.ok) throw new Error("failed to fetch global scores");
+        const data = await res.json();
+        if (!isMounted) return;
+        // data is array of { score, ts, durationMs, clientId }
+        const entries: Entry[] = Array.isArray(data)
+          ? data.map((it: any) => ({
+              score: typeof it.score === "number" ? it.score : 0,
+              playNumber: 0, // will set after sorting
+              ts: typeof it.ts === "number" ? it.ts : null,
+              durationMs:
+                typeof it.durationMs === "number" ? it.durationMs : null,
+              clientId: typeof it.clientId === "string" ? it.clientId : null,
+            }))
+          : [];
 
+        // sort by score desc, tiebreaker = shortest duration
+        const compareEntriesForRank = (a: Entry, b: Entry) => {
+          if (b.score !== a.score) return b.score - a.score;
+          const aDur =
+            typeof a.durationMs === "number"
+              ? a.durationMs
+              : Number.POSITIVE_INFINITY;
+          const bDur =
+            typeof b.durationMs === "number"
+              ? b.durationMs
+              : Number.POSITIVE_INFINITY;
+          return aDur - bDur;
+        };
+
+        const sorted = entries.slice().sort(compareEntriesForRank);
+        // assign playNumber as rank for display
+        const withRank = sorted.map((e, i) => ({ ...e, playNumber: i + 1 }));
+        if (!isMounted) return;
+        setGlobalScores(withRank);
+      } catch (err) {
+        console.error("Failed to load global scores", err);
+      } finally {
+        if (isMounted) setGlobalLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab]);
+
+  // load the local client id to mark "(You)" in global list
+  useEffect(() => {
+    try {
+      const id = localStorage.getItem("zillow_clientId");
+      setLocalClientId(id);
+    } catch (err) {
+      setLocalClientId(null);
+    }
+  }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -90,15 +160,36 @@ export default function Leaderboard() {
           const entries: Entry[] = Array.isArray(parsed)
             ? parsed.map((item: unknown, i: number) => {
                 if (typeof item === "number") {
-                  return { score: item, playNumber: i + 1, ts: null };
+                  return {
+                    score: item,
+                    playNumber: i + 1,
+                    ts: null,
+                    durationMs: null,
+                  };
                 }
                 if (item && typeof item === "object" && "score" in item) {
-                  const it = item as { score?: unknown; ts?: unknown };
+                  const it = item as {
+                    score?: unknown;
+                    ts?: unknown;
+                    durationMs?: unknown;
+                  };
                   const scoreVal = typeof it.score === "number" ? it.score : 0;
                   const tsVal = typeof it.ts === "number" ? it.ts : null;
-                  return { score: scoreVal, playNumber: i + 1, ts: tsVal };
+                  const durVal =
+                    typeof it.durationMs === "number" ? it.durationMs : null;
+                  return {
+                    score: scoreVal,
+                    playNumber: i + 1,
+                    ts: tsVal,
+                    durationMs: durVal,
+                  };
                 }
-                return { score: 0, playNumber: i + 1, ts: null };
+                return {
+                  score: 0,
+                  playNumber: i + 1,
+                  ts: null,
+                  durationMs: null,
+                };
               })
             : [];
           setLeaderboardScores(entries);
@@ -106,11 +197,24 @@ export default function Leaderboard() {
           const initial: Record<number, number> = {};
           entries.forEach((e) => (initial[e.playNumber] = e.score));
           setDisplayedScores(initial);
-          // initial render order: sort descending by score
+          // initial render order: sort descending by score, tiebreaker = shortest duration
+          const compareEntriesForRank = (a: Entry, b: Entry) => {
+            if (b.score !== a.score) return b.score - a.score;
+            const aDur =
+              typeof a.durationMs === "number"
+                ? a.durationMs
+                : Number.POSITIVE_INFINITY;
+            const bDur =
+              typeof b.durationMs === "number"
+                ? b.durationMs
+                : Number.POSITIVE_INFINITY;
+            return aDur - bDur; // smaller duration ranks higher
+          };
+
           setRenderOrder(
             entries
               .slice()
-              .sort((a, b) => b.score - a.score)
+              .sort(compareEntriesForRank)
               .map((e) => e.playNumber)
           );
         } catch (error) {
@@ -148,12 +252,23 @@ export default function Leaderboard() {
     if (!leaderboardScores || leaderboardScores.length === 0) return;
     const last = leaderboardScores[leaderboardScores.length - 1];
     // Consider it "just played" if timestamp is very recent (30s)
-    const recentWindow = 300 * 1000;
+    const recentWindow = 30 * 1000;
     if (last && last.ts && Date.now() - last.ts < recentWindow) {
-      // Calculate final position based on score
-      const sorted = leaderboardScores
-        .slice()
-        .sort((a, b) => b.score - a.score);
+      // Calculate final position based on score (with duration tiebreaker)
+      const compareEntriesForRank = (a: Entry, b: Entry) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aDur =
+          typeof a.durationMs === "number"
+            ? a.durationMs
+            : Number.POSITIVE_INFINITY;
+        const bDur =
+          typeof b.durationMs === "number"
+            ? b.durationMs
+            : Number.POSITIVE_INFINITY;
+        return aDur - bDur;
+      };
+
+      const sorted = leaderboardScores.slice().sort(compareEntriesForRank);
       const targetIndex = sorted.findIndex(
         (e) => e.playNumber === last.playNumber
       );
@@ -369,6 +484,14 @@ export default function Leaderboard() {
     return `Achieved on ${month} ${ordinal(dayNum)}, ${year}`;
   }
 
+  function formatDuration(ms: number | null | undefined) {
+    if (ms == null || isNaN(ms)) return "";
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }
+
   // Prepare rendered items based on renderOrder to keep reordering controlled
   const renderedItems = renderOrder.map((pn, idx) => {
     const entry = leaderboardScores.find((e) => e.playNumber === pn)!;
@@ -456,6 +579,12 @@ export default function Leaderboard() {
         </span>
         <span className="score-value">
           {displayedScores[entry.playNumber] ?? entry.score}
+          {entry.durationMs ? (
+            <span className="time-value">
+              {" "}
+              — {formatDuration(entry.durationMs)}
+            </span>
+          ) : null}
         </span>
       </motion.li>
     );
@@ -464,26 +593,108 @@ export default function Leaderboard() {
   return (
     <div className="leaderboard-container">
       {showConfetti ? <Confetti active={showConfetti} /> : null}
-      <div className="leaderboard-header">
-        <h1>Leaderboard</h1>
-        <ThemeToggle />
-      </div>
+      {/* header moved inside the card */}
       {loading ? (
         <LeaderboardLoadingSkeleton />
-      ) : leaderboardScores.length > 0 ? (
+      ) : (
         <>
           <Card className="rounded-xl">
             <div className="leaderboard-card">
-              <h2>Your Total Scores</h2>
+              {/* Heading moved inside the card */}
+              <div className="card-top-row">
+                <h1 className="card-title">Leaderboard</h1>
+              </div>
+
               <hr className="leaderboard-divider" />
+
+              <div className="tabs-row">
+                <div className="leaderboard-tabs flex gap-2 mb-2">
+                  <button
+                    className={`tab-btn ${activeTab === "local" ? "active" : ""}`}
+                    onClick={() => setActiveTab("local")}
+                    aria-pressed={activeTab === "local"}
+                  >
+                    Local
+                  </button>
+                  <button
+                    className={`tab-btn ${activeTab === "global" ? "active" : ""}`}
+                    onClick={() => setActiveTab("global")}
+                    aria-pressed={activeTab === "global"}
+                  >
+                    Global
+                  </button>
+                </div>
+                <div className="tabs-right">
+                  <ThemeToggle />
+                </div>
+              </div>
+
               <div className="leaderboard-list-wrapper">
-                <ul ref={listRef} className="leaderboard-list">
-                  {/** Display ordered by highest score, but show the original play number. */}
-                  {renderedItems}
-                </ul>
+                {activeTab === "local" ? (
+                  <ul ref={listRef} className="leaderboard-list">
+                    {renderedItems}
+                  </ul>
+                ) : globalLoading ? (
+                  <LeaderboardLoadingSkeleton compact />
+                ) : globalScores && globalScores.length > 0 ? (
+                  <ul className="leaderboard-list">
+                    {globalScores.map((entry, idx) => {
+                      const isYou =
+                        localClientId && entry.clientId === localClientId;
+                      const displayClient = entry.clientId ?? "----";
+                      return (
+                        <li
+                          key={`global-${displayClient}-${idx}`}
+                          className={`leaderboard-item rank-${idx + 1}`}
+                        >
+                          <span className="score-label">
+                            <span className="global-username">
+                              User <span className="play-number">#</span>{displayClient}
+                              {isYou ? " (You)" : ""}
+                            </span>
+                            {entry.ts ? (
+                              <Tooltip title={formatAchieved(entry.ts)} arrow>
+                                <span className="timestamp-icon" aria-hidden>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden
+                                  >
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <path d="M12 7v5l3 2"></path>
+                                  </svg>
+                                </span>
+                              </Tooltip>
+                            ) : null}
+                          </span>
+                          <span className="score-value">
+                            {entry.score}
+                            {entry.durationMs ? (
+                              <span className="time-value">
+                                {" "}
+                                — {formatDuration(entry.durationMs)}
+                              </span>
+                            ) : null}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <div className="text-center">
+                    <p>No global scores yet.</p>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
+
           <div className="leaderboard-actions" aria-hidden={false}>
             <button
               className="leaderboard-home"
@@ -509,29 +720,6 @@ export default function Leaderboard() {
             )}
           </div>
         </>
-      ) : (
-        <div className="text-center">
-          <p>No scores available. Play the game to see your scores!</p>
-          <div className="leaderboard-actions" aria-hidden={false}>
-            <button
-              className="leaderboard-home"
-              onClick={() => router.push("/")}
-              title="Home"
-            >
-              <span className="home-icon" aria-hidden>
-                <FontAwesomeIcon icon={faHome} />
-              </span>
-              Home
-            </button>
-            <button
-              className="leaderboard-tryagain"
-              onClick={() => router.push("/play")}
-              title="Play!"
-            >
-              Play!
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );

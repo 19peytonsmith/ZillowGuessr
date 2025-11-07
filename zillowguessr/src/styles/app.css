@@ -4,18 +4,77 @@
 
 /* Play page header responsive layout */
 @media (max-width: 768px) {
+  /* Mobile-specific play header: place Home at left, timer centered, theme toggle at right
+     and move the address into a second line below the control row. This only affects
+     the play page (the header uses .play-page-header). */
   .play-page-header {
-    flex-direction: column-reverse !important;
-    align-items: flex-start !important;
+    position: relative;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    /* make room for absolute-positioned controls (home/timer/toggle) */
+    padding-top: 56px;
   }
 
+  /* Keep the address visible but move it below the control row so the top row
+     can host left/center/right controls. */
   .play-page-header h1 {
+    display: block;
     width: 100%;
+    margin: 0; /* use padding on the container to create space above */
+    font-weight: 600;
+    line-height: 1.2;
   }
 
+  /* Ensure the right-side container doesn't force layout on the top row */
   .play-page-header > div {
-    width: 100%;
+    /* let content size itself; we're absolutely positioning the controls */
+    width: auto;
     justify-content: flex-end;
+  }
+
+  /* Home label visibility is handled in JSX with Tailwind utilities (hidden md:inline). */
+
+  /* Make the icon-only Home button square on mobile */
+  .play-page-header .play-home-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .play-page-header .play-home-btn .play-home-icon {
+    font-size: 18px !important;
+    line-height: 1;
+  }
+
+  /* Position the Home button flush left (tighten to hug edge) */
+  .play-page-header .play-home-btn {
+    position: absolute;
+    left: 0px; /* reduced from 10px to sit closer to the edge */
+    top: 8px;
+    z-index: 5;
+  }
+
+  /* Center the timer horizontally in the header row */
+  .play-page-header .timer-display {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 8px;
+    z-index: 5;
+  }
+
+  /* Place the theme toggle flush right (tighten to hug edge) */
+  .play-page-header .theme-toggle {
+    position: absolute;
+    right: 0px; /* reduced from 10px to sit closer to the edge */
+    top: 8px;
+    z-index: 5;
   }
 
   .property-info-row {
@@ -56,6 +115,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 40px;
   padding: 8px 14px;
   border-radius: 8px;
   border: 1px solid var(--btn-primary);
@@ -389,4 +449,53 @@ html[data-theme="dark"] .exit-confirm {
   border-color: #dc3545 !important;
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
   animation: input-shake 0.4s ease-in-out;
+}
+
+/* Force Orbitron for the play timer button when broad selectors use !important */
+.play-home-btn.orbitron,
+.play-home-btn.orbitron * {
+  font-family:
+    "Orbitron", ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+    monospace !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* Ensure no hover/transform/animation applies to the orbitron timer element */
+.play-home-btn.orbitron {
+  pointer-events: none; /* non-interactive */
+}
+.play-home-btn.orbitron:hover {
+  background: transparent !important;
+  color: inherit !important;
+  transform: none !important;
+}
+.play-home-btn.orbitron .play-home-icon {
+  animation: none !important;
+}
+
+/* Timer display styles (moved from inline styles) */
+.play-home-btn.orbitron.timer-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px; /* same as .play-home-btn to match height */
+  background: transparent !important;
+  color: inherit !important;
+  border-radius: 8px !important;
+  pointer-events: none !important; /* non-interactive */
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.1em !important;
+  /* Match the other header buttons' sizing so the timer fills the same height */
+  box-sizing: border-box !important;
+  font-size: inherit !important;
+  line-height: 1.2 !important;
+  height: auto !important;
+  min-height: 40px !important;
+  align-self: stretch !important;
+  /* Prevent width fluctuation from pushing nearby controls */
+  flex: 0 0 72px !important; /* fixed width to keep layout stable */
+  min-width: 72px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  transition: none !important;
 }

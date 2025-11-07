@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Orbitron } from "next/font/google";
 import type { SliderProps } from "@mui/material/Slider";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
@@ -23,6 +24,12 @@ import "@/styles/app.css";
 import "@/styles/leaderboard.css";
 
 const ROUNDS = Number(process.env.NEXT_PUBLIC_NUMBER_OF_ROUNDS) || 5;
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
 
 type PropertyInfo = {
   urls: string[];
@@ -124,6 +131,11 @@ export default function PlayPage() {
   const [isLoadingResults, setIsLoadingResults] = useState<boolean>(false);
   const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
   const [isExiting, setIsExiting] = useState<boolean>(false);
+  // Timer state (tracks elapsed time from start of play until results)
+  const startTimeRef = useRef<number | null>(null);
+  const [elapsedMs, setElapsedMs] = useState<number>(0);
+  const timerRef = useRef<number | null>(null);
+  const [clientId, setClientId] = useState<string | null>(null);
 
   const currentData = useMemo(
     () => propertyDataQueue[currentIndex],
@@ -131,8 +143,61 @@ export default function PlayPage() {
   );
 
   useEffect(() => {
+    // initialize client id (4-digit) persisted per browser/device
+    try {
+      const key = "zillow_clientId";
+      let id = null;
+      if (typeof window !== "undefined") id = localStorage.getItem(key);
+      if (!id) {
+        const rand = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+        id = String(rand);
+        try {
+          localStorage.setItem(key, id);
+        } catch (e) {
+          // ignore
+        }
+      }
+      setClientId(id);
+    } catch (err) {
+      // ignore storage errors
+    }
+
     setShowMap(false);
   }, [currentIndex]);
+
+  // Start the timer on page load (mount) and stop when results are ready
+  useEffect(() => {
+    // start immediately on mount
+    startTimeRef.current = Date.now();
+    timerRef.current = window.setInterval(() => {
+      if (startTimeRef.current) setElapsedMs(Date.now() - startTimeRef.current);
+    }, 250) as unknown as number;
+
+    return () => {
+      // cleanup on unmount
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Stop/finalize the timer when we hit the results state
+  useEffect(() => {
+    if (getResults && startTimeRef.current != null) {
+      const final = startTimeRef.current
+        ? Date.now() - startTimeRef.current
+        : elapsedMs;
+      setElapsedMs(final);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      startTimeRef.current = null;
+    }
+  }, [getResults]);
+
+  // Orbitron font is imported via next/font/google (see top of file)
 
   const handlePropertySliderOnChange: React.ComponentProps<
     typeof PropertySlider
@@ -245,6 +310,14 @@ export default function PlayPage() {
     }
   }
 
+  function formatDuration(ms: number | null | undefined) {
+    if (ms == null || isNaN(ms)) return "0:00";
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }
+
   const handleSubmit = (valueOfHome: number) => {
     const numericSlider = Array.isArray(sliderValue)
       ? sliderValue[0]
@@ -350,19 +423,36 @@ export default function PlayPage() {
     const existing = Array.isArray(existingRaw)
       ? (existingRaw
           .map((it: unknown) => {
-            if (typeof it === "number") return { score: it, ts: null };
+            if (typeof it === "number")
+              return { score: it, ts: null, durationMs: null };
             if (it && typeof it === "object" && "score" in it) {
-              const o = it as { score?: unknown; ts?: unknown };
+              const o = it as {
+                score?: unknown;
+                ts?: unknown;
+                durationMs?: unknown;
+              };
               const scoreVal = typeof o.score === "number" ? o.score : 0;
               const tsVal = typeof o.ts === "number" ? o.ts : null;
-              return { score: scoreVal, ts: tsVal };
+              const durVal =
+                typeof o.durationMs === "number" ? o.durationMs : null;
+              return { score: scoreVal, ts: tsVal, durationMs: durVal };
             }
             return null;
           })
-          .filter(Boolean) as { score: number; ts: number | null }[])
+          .filter(Boolean) as {
+          score: number;
+          ts: number | null;
+          durationMs: number | null;
+        }[])
       : [];
 
-    const updated = [...existing, { score: total, ts: Date.now() }];
+    const finalDuration = startTimeRef.current
+      ? Date.now() - startTimeRef.current
+      : elapsedMs;
+    const updated = [
+      ...existing,
+      { score: total, ts: Date.now(), durationMs: finalDuration, clientId },
+    ];
 
     if (typeof window !== "undefined") {
       try {
@@ -375,6 +465,26 @@ export default function PlayPage() {
         });
       }
     }
+
+    // Also attempt to persist the score to global storage (MongoDB) via API.
+    (async () => {
+      try {
+        await fetch("/api/scores", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            score: total,
+            ts: Date.now(),
+            durationMs: finalDuration,
+            clientId,
+          }),
+        });
+      } catch (err) {
+        // don't block navigation; log to console for diagnostics
+        // eslint-disable-next-line no-console
+        console.warn("Failed to persist global score", err);
+      }
+    })();
 
     router.push("/leaderboards?fromPlay=true");
   };
@@ -438,9 +548,19 @@ export default function PlayPage() {
                 <span className="play-home-icon" aria-hidden>
                   <FontAwesomeIcon icon={faHome} />
                 </span>
-                Home
+                <span className="hidden md:inline">Home</span>
               </button>
-              <ThemeToggle />
+              <div className="flex items-center gap-2">
+                <div
+                  className={`play-home-btn ${orbitron.className} orbitron timer-display`}
+                  role="status"
+                  aria-label={`Time elapsed: ${formatDuration(elapsedMs)}`}
+                  title={`Time elapsed: ${formatDuration(elapsedMs)}`}
+                >
+                  {formatDuration(elapsedMs)}
+                </div>
+                <ThemeToggle />
+              </div>
             </div>
           </div>
           <div className="property-info-row flex justify-between">

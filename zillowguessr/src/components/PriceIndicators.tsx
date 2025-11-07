@@ -40,8 +40,9 @@ export default function PriceIndicators({
           left: toPercent(value[0]),
         }}
       >
-        <div className="price-indicator-label price-indicator-animate">
-          Your guess: {prettyValue(value[0])}
+        <div className="price-indicator-label price-indicator-animate text-center">
+          <div className="font-bold">Your guess</div>
+          <div className="mt-1">{prettyValue(value[0])}</div>
         </div>
       </div>
 
@@ -49,12 +50,13 @@ export default function PriceIndicators({
         aria-hidden
         className="absolute z-10 flex flex-col items-center pointer-events-none -translate-x-1/2"
         style={{
-          top,
+          top: top - 20,
           left: toPercent(value[1]),
         }}
       >
-        <div className="price-indicator-label price-indicator-animate actual">
-          Actual: {prettyValue(value[1])}
+        <div className="price-indicator-label price-indicator-animate actual text-center">
+          <div className="font-bold">Actual</div>
+          <div className="mt-1">{prettyValue(value[1])}</div>
         </div>
       </div>
     </>
