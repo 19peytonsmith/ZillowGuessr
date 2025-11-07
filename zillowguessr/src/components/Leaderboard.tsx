@@ -649,7 +649,8 @@ export default function Leaderboard() {
                         >
                           <span className="score-label">
                             <span className="global-username">
-                              User <span className="play-number">#</span>{displayClient}
+                              User <span className="play-number">#</span>
+                              {displayClient}
                               {isYou ? " (You)" : ""}
                             </span>
                             {entry.ts ? (
