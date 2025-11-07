@@ -12,9 +12,10 @@ type ScoreDoc = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const { id } = params;
     if (!id) {
       return NextResponse.json({ error: "id required" }, { status: 400 });
@@ -49,9 +50,10 @@ export async function GET(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const { id } = params;
     if (!id) {
       return NextResponse.json({ error: "id required" }, { status: 400 });
