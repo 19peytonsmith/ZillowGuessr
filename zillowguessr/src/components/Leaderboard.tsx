@@ -9,7 +9,11 @@ import ThemeToggle from "./ThemeToggle";
 import LeaderboardLoadingSkeleton from "./LeaderboardLoadingSkeleton";
 import Tooltip from "@mui/material/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRotateRight, faHome } from "@fortawesome/free-solid-svg-icons";
+import {
+  faRotateRight,
+  faHome,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import Confetti from "./Confetti";
 import { Card } from "./Card";
 import { motion } from "framer-motion";
@@ -516,6 +520,15 @@ export default function Leaderboard() {
             ease: [0.45, 0, 0.15, 1], // Stronger ease in, smooth ease out
           },
         }}
+        onClick={(e: React.MouseEvent) => {
+          // On touch devices, allow tapping the whole row to toggle the "Achieved on" tooltip.
+          if (!isTouchDevice) return;
+          if (!entry.ts) return;
+          e.stopPropagation();
+          setOpenTooltipPlay((prev) =>
+            prev === entry.playNumber ? null : entry.playNumber
+          );
+        }}
         data-play-number={entry.playNumber}
         className={`leaderboard-item rank-${idx + 1} ${
           highlightedPlayNumber === entry.playNumber ? "animating" : ""
@@ -658,14 +671,57 @@ export default function Leaderboard() {
                           className={`leaderboard-item rank-${idx + 1}`}
                         >
                           <span className="score-label">
+                            {isYou ? (
+                              <Tooltip title="You" arrow>
+                                <span
+                                  className="you-indicator"
+                                  aria-label="You"
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faUser}
+                                    className="you-icon"
+                                  />
+                                </span>
+                              </Tooltip>
+                            ) : null}
                             <span className="global-username">
                               User <span className="play-number">#</span>
                               {displayClient}
-                              {isYou ? " (You)" : ""}
                             </span>
                             {entry.ts ? (
-                              <Tooltip title={formatAchieved(entry.ts)} arrow>
-                                <span className="timestamp-icon" aria-hidden>
+                              <Tooltip
+                                title={formatAchieved(entry.ts)}
+                                arrow
+                                disableHoverListener={isTouchDevice}
+                                disableFocusListener={isTouchDevice}
+                                disableTouchListener={isTouchDevice}
+                                open={
+                                  isTouchDevice
+                                    ? openTooltipPlay === entry.playNumber
+                                    : undefined
+                                }
+                                onClose={() =>
+                                  isTouchDevice && setOpenTooltipPlay(null)
+                                }
+                              >
+                                <span
+                                  className="timestamp-icon"
+                                  aria-hidden
+                                  data-tooltip-pn={entry.playNumber}
+                                  onPointerUp={(
+                                    e: React.PointerEvent<HTMLSpanElement>
+                                  ) => {
+                                    if (!isTouchDevice) return;
+                                    const pType = e.pointerType;
+                                    if (pType && pType !== "touch") return;
+                                    e.stopPropagation();
+                                    setOpenTooltipPlay((prev) =>
+                                      prev === entry.playNumber
+                                        ? null
+                                        : entry.playNumber
+                                    );
+                                  }}
+                                >
                                   <svg
                                     width="12"
                                     height="12"

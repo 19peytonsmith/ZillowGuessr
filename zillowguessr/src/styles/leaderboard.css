@@ -186,6 +186,73 @@
   display: inline-block;
 }
 
+/* Global username/you indicator */
+.global-username {
+  /* keep default inline text flow so spacing matches original layout */
+}
+
+.you-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px; /* place space between icon and username */
+}
+
+.you-icon {
+  color: var(--you-color, #7c3aed); /* default unique violet color */
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+/* subtle bounce animation for the "you" icon */
+
+@keyframes you-bounce {
+  /* Quick two-stage bounce at start of cycle, then pause until next iteration */
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  /* main pop */
+  8% {
+    transform: translateY(-6px) scale(1.04);
+  }
+  /* settle down */
+  18% {
+    transform: translateY(0) scale(1);
+  }
+  /* smaller rebound */
+  28% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  /* final settle */
+  36% {
+    transform: translateY(0) scale(1);
+  }
+  /* rest of cycle is pause */
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.you-icon {
+  display: inline-block; /* ensure transform affects only the icon */
+  will-change: transform;
+  /* Run the two-stage bounce once per 5 seconds */
+  animation: you-bounce 5000ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .you-icon {
+    animation: none !important;
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .you-icon {
+    animation: none !important;
+  }
+}
+
 /* Top 3 medal colors */
 .leaderboard-item.rank-1 .score-value {
   color: #ffd700;
