@@ -388,6 +388,143 @@ html:not([data-theme="dark"]) .main-content.splash-hero::before {
 }
 
 /* Splash lead text */
+.play-btn-canada {
+  --btn-h: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--btn-h);
+  padding: 0 20px;
+  font-size: 1rem;
+  border-radius: 10px;
+  /* Use the exact same subtle gradient as the main Play button */
+  background: linear-gradient(
+    90deg,
+    var(--btn-primary),
+    color-mix(in srgb, var(--btn-primary) 70%, black 15%)
+  );
+  color: var(--bg) !important;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.12);
+  transition:
+    transform 180ms cubic-bezier(0.22, 0.9, 0.35, 1),
+    box-shadow 180ms;
+  position: relative;
+  overflow: visible;
+  text-decoration: none !important;
+}
+
+.play-btn-canada:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.14);
+}
+
+.play-btn-canada:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* Maple leaf icon sizing for Canada button */
+.maple-leaf-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+/* Default splash/main behavior: invert on light theme so the icon appears white,
+   show as-is (dark) in dark theme. */
+/* Splash/main: add a subtle drop shadow so the leaf pops against backgrounds */
+html[data-theme="dark"] .maple-leaf-icon {
+  /* dark theme: icon dark, add a more prominent shadow for separation */
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.36));
+}
+html:not([data-theme="dark"]) .maple-leaf-icon {
+  /* light theme: invert to white, use a stronger shadow so it reads on bright backgrounds */
+  filter: invert(1) saturate(2) contrast(1.1)
+    drop-shadow(0 3px 6px rgba(0, 0, 0, 0.32));
+}
+
+/* Leaderboard pages: invert the filter behavior compared to the main/splash page
+   so the maple leaf adapts correctly when shown on the leaderboard UI. */
+/* Leaderboard override: inverse behavior but keep subtle shadow for legibility */
+html[data-theme="dark"] .leaderboard-container .maple-leaf-icon {
+  /* In dark theme (leaderboard): show white via invert + stronger shadow */
+  filter: invert(1) saturate(2) contrast(1.1)
+    drop-shadow(0 3px 6px rgba(0, 0, 0, 0.32));
+}
+html:not([data-theme="dark"]) .leaderboard-container .maple-leaf-icon {
+  /* In light theme (leaderboard): show dark icon and add a stronger soft shadow */
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.34));
+}
+
+/* Canada button per-letter paint animation (red - white - red) */
+:root {
+  --can-red: #d52b1e; /* Canadian flag red */
+  --can-white: #ffffff;
+}
+
+.play-btn-canada .canada-text {
+  display: inline-flex;
+  align-items: center;
+  color: inherit; /* start with inherited color */
+}
+
+.canada-letter {
+  display: inline-block;
+  will-change: color, transform, opacity;
+  /* start slightly dim so the paint effect is visible */
+  color: currentColor;
+  opacity: 1;
+}
+.canada-letter.space {
+  width: 0.45em;
+}
+
+/* Assign target zones: first third red, middle white, last third red.
+   We'll determine target color at runtime using CSS :nth-child selectors for
+   a reasonable approximation. */
+.play-btn-canada .canada-letter:nth-child(-n + 5) {
+  /* letters 1..5 ("Play[space]") — paint red */
+  --target-color: var(--can-red);
+}
+/* Specifically make only the "can" in "Canada" white: characters at positions 6,7,8 */
+.play-btn-canada .canada-letter:nth-child(6),
+.play-btn-canada .canada-letter:nth-child(7),
+.play-btn-canada .canada-letter:nth-child(8) {
+  --target-color: var(--can-white);
+}
+/* Remaining letters (from 9 onward) paint red */
+.play-btn-canada .canada-letter:nth-child(n + 9) {
+  --target-color: var(--can-red);
+}
+
+/* paint animation: grow into color and slightly pop */
+@keyframes canada-paint {
+  0% {
+    color: currentColor;
+    transform: translateY(6px) scale(0.98);
+    opacity: 0.15;
+    text-shadow: none;
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+    color: var(--target-color, currentColor);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    color: var(--target-color, currentColor);
+    opacity: 1;
+    text-shadow: none;
+  }
+}
+
+/* Trigger staggered paint on hover */
+.play-btn-canada:hover .canada-letter:not(.space) {
+  animation: canada-paint 520ms cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+/* Splash lead text */
 .splash-lead {
   font-size: 1.125rem;
   margin-bottom: 20px;

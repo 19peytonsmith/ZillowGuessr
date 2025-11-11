@@ -25,6 +25,7 @@ export default function Leaderboard() {
     ts?: number | null;
     durationMs?: number | null;
     clientId?: string | null;
+    isCanada?: boolean;
   };
   const [localClientId, setLocalClientId] = useState<string | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<Entry[]>([]);
@@ -83,6 +84,8 @@ export default function Leaderboard() {
                   typeof obj.clientId === "string"
                     ? (obj.clientId as string)
                     : null,
+                // include isCanada flag returned by the API so the UI can show the maple leaf
+                isCanada: !!obj.isCanada,
               };
             })
           : [];
@@ -179,6 +182,7 @@ export default function Leaderboard() {
                     playNumber: i + 1,
                     ts: null,
                     durationMs: null,
+                    isCanada: false,
                   };
                 }
                 if (item && typeof item === "object" && "score" in item) {
@@ -186,16 +190,20 @@ export default function Leaderboard() {
                     score?: unknown;
                     ts?: unknown;
                     durationMs?: unknown;
+                    isCanada?: unknown;
                   };
                   const scoreVal = typeof it.score === "number" ? it.score : 0;
                   const tsVal = typeof it.ts === "number" ? it.ts : null;
                   const durVal =
                     typeof it.durationMs === "number" ? it.durationMs : null;
+                  const isCanadaVal =
+                    typeof it.isCanada === "boolean" ? it.isCanada : false;
                   return {
                     score: scoreVal,
                     playNumber: i + 1,
                     ts: tsVal,
                     durationMs: durVal,
+                    isCanada: isCanadaVal,
                   };
                 }
                 return {
@@ -203,6 +211,7 @@ export default function Leaderboard() {
                   playNumber: i + 1,
                   ts: null,
                   durationMs: null,
+                  isCanada: false,
                 };
               })
             : [];
@@ -538,8 +547,18 @@ export default function Leaderboard() {
         key={entry.playNumber}
       >
         <span className="score-label">
-          Game <span className="play-number">#</span>
-          {entry.playNumber}
+          {entry.isCanada ? (
+            <img
+              src="/assets/maple-leaf.svg"
+              alt="Canadian score"
+              className="me-1 maple-leaf-icon"
+              aria-hidden
+            />
+          ) : null}
+          <span className="label-text">
+            Game <span className="play-number">#</span>
+            {entry.playNumber}
+          </span>
           {entry.ts ? (
             <Tooltip
               title={formatAchieved(entry.ts)}
@@ -684,9 +703,20 @@ export default function Leaderboard() {
                                 </span>
                               </Tooltip>
                             ) : null}
-                            <span className="global-username">
-                              User <span className="play-number">#</span>
-                              {displayClient}
+                            <span className="global-username flex items-center">
+                              {/* If this score is Canadian, show the maple leaf SVG */}
+                              {entry.isCanada ? (
+                                <img
+                                  src="/assets/maple-leaf.svg"
+                                  alt="Canadian score"
+                                  className="me-1 maple-leaf-icon"
+                                  aria-hidden
+                                />
+                              ) : null}
+                              <span className="label-text">
+                                User <span className="play-number">#</span>
+                                {displayClient}
+                              </span>
                             </span>
                             {entry.ts ? (
                               <Tooltip
@@ -776,7 +806,13 @@ export default function Leaderboard() {
             {fromPlay && (
               <button
                 className="leaderboard-tryagain"
-                onClick={() => router.push("/play")}
+                onClick={() => {
+                  const listingsParam = searchParams.get("listings");
+                  const target = listingsParam
+                    ? `/play?listings=${encodeURIComponent(listingsParam)}`
+                    : "/play";
+                  router.push(target);
+                }}
                 title="Try Again"
               >
                 Try Again

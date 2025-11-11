@@ -6,6 +6,7 @@ type ScoreDoc = {
   ts: number;
   durationMs?: number | null;
   clientId?: string | null;
+  isCanada?: boolean;
 };
 
 export async function GET() {
@@ -28,6 +29,7 @@ export async function GET() {
       ts: d.ts,
       durationMs: d.durationMs ?? null,
       clientId: d.clientId ?? null,
+      isCanada: !!d.isCanada,
     }));
 
     return NextResponse.json(out);
@@ -46,6 +48,7 @@ export async function POST(request: Request) {
       typeof body.durationMs === "number" ? body.durationMs : null;
     const clientId =
       body && typeof body.clientId === "string" ? body.clientId : null;
+    const isCanada = body && body.isCanada === true;
 
     if (score == null) {
       return NextResponse.json({ error: "score required" }, { status: 400 });
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
           score,
           ts,
           durationMs,
+          isCanada,
         });
         return NextResponse.json({
           insertedId: insertRes.insertedId,
@@ -85,7 +89,10 @@ export async function POST(request: Request) {
       })();
 
       if (shouldUpdate) {
-        await coll.updateOne({ clientId }, { $set: { score, ts, durationMs } });
+        await coll.updateOne(
+          { clientId },
+          { $set: { score, ts, durationMs, isCanada } }
+        );
         return NextResponse.json({ updated: true, ok: true });
       }
 
@@ -94,7 +101,12 @@ export async function POST(request: Request) {
     }
 
     // fallback: no clientId provided — insert as anonymous
-    const insertRes = await coll.insertOne({ score, ts, durationMs });
+    const insertRes = await coll.insertOne({
+      score,
+      ts,
+      durationMs,
+      isCanada,
+    });
     return NextResponse.json({ insertedId: insertRes.insertedId, ok: true });
   } catch (err) {
     console.error("POST /api/scores error", err);

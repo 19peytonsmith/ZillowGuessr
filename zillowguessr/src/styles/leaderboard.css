@@ -19,7 +19,7 @@
 }
 
 .leaderboard-container > div:has(.leaderboard-card) {
-  max-width: 600px;
+  max-width: 500px;
   width: 100%;
 }
 
@@ -34,7 +34,7 @@
 .leaderboard-list-wrapper {
   position: relative;
   width: 100%;
-  max-height: 600px;
+  max-height: 500px;
   overflow: visible; /* Allow glow to extend outside wrapper */
 }
 
@@ -109,7 +109,7 @@
   padding: 0 6px; /* Add horizontal padding to prevent glow cutoff */
   margin: 0;
   text-align: left;
-  max-height: 600px;
+  max-height: 500px;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -150,6 +150,8 @@
 }
 
 .score-label {
+  display: flex;
+  align-items: center;
   font-size: 0.95rem;
 }
 

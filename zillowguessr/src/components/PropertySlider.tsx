@@ -11,15 +11,8 @@ type PropertySliderProps = {
   color?: SliderProps["color"];
   disabled?: boolean;
   onSubmit?: () => void;
+  isCanada?: boolean;
 };
-
-const marks: NonNullable<SliderProps["marks"]> = [
-  { value: 0, label: "$0" },
-  { value: 100, label: "$100K" },
-  { value: 600, label: "$1M" },
-  { value: 900, label: "$5M" },
-  { value: 1000, label: "$20M" },
-];
 
 function calculateValue(v: number): number {
   // Linear segments - more space for mid-to-high range
@@ -51,10 +44,8 @@ function calculateSliderValue(price: number): number {
   }
 }
 
-function prettyValue(v: number): string {
-  const money = calculateValue(v);
-  return `$${Math.round(money).toLocaleString("en-US")}`;
-}
+// prettyValue and marks are generated per-instance so they can use
+// the currency prefix (USD vs CAD)
 
 export default function PropertySlider({
   value,
@@ -62,7 +53,22 @@ export default function PropertySlider({
   color = "primary",
   disabled = false,
   onSubmit,
+  isCanada = false,
 }: PropertySliderProps) {
+  const currencyPrefix = isCanada ? "C$" : "$";
+
+  const prettyValue = (v: number): string => {
+    const money = calculateValue(v);
+    return `${currencyPrefix}${Math.round(money).toLocaleString("en-US")}`;
+  };
+
+  const marks: NonNullable<SliderProps["marks"]> = [
+    { value: 0, label: `${currencyPrefix}0` },
+    { value: 100, label: `${currencyPrefix}100K` },
+    { value: 600, label: `${currencyPrefix}1M` },
+    { value: 900, label: `${currencyPrefix}5M` },
+    { value: 1000, label: `${currencyPrefix}20M` },
+  ];
   const isRange = Array.isArray(value);
   const topOffset = isRange ? 10 : 0;
   const [inputValue, setInputValue] = React.useState("");
@@ -157,7 +163,9 @@ export default function PropertySlider({
 
       {!isRange && (
         <div className="mt-3 flex items-center gap-1.5 justify-end precise-input-container">
-          <label className="text-sm font-medium text-[var(--text)]">$</label>
+          <label className="text-sm font-medium text-[var(--text)]">
+            {currencyPrefix}
+          </label>
           <input
             type="text"
             value={inputValue}

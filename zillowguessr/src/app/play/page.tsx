@@ -45,6 +45,22 @@ type PropertyInfo = {
 
 export default function PlayPage() {
   const router = useRouter();
+  // null means "not yet initialized"; afterwards it's string (possibly empty)
+  const [listingsParam, setListingsParam] = useState<string | null>(null);
+  const isCanada = listingsParam === "canada";
+
+  useEffect(() => {
+    // Read `listings` query-param client-side to avoid a prerender / suspense
+    // requirement from next/navigation's useSearchParams. We store `null`
+    // initially so data-loading can wait until this value is initialized.
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      setListingsParam(sp.get("listings") ?? "");
+    } else {
+      // On server (unlikely for this client component) keep as empty string
+      setListingsParam("");
+    }
+  }, []);
   const [showMap, setShowMap] = useState<boolean>(false);
   const DEFAULT_MAP_ZOOM = 8;
 
@@ -230,6 +246,7 @@ export default function PlayPage() {
         const params = new URLSearchParams();
         params.set("page", String(index));
         params.set("attempt", String(attempt));
+        if (listingsParam) params.set("listings", listingsParam);
         if (excludes.length > 0) {
           // send as comma-separated string; backend expects `toExclude` for resampling
           params.set("toExclude", excludes.join(","));
@@ -263,7 +280,12 @@ export default function PlayPage() {
     return null;
   };
 
+  // Load property data once listingsParam has been initialized. This ensures
+  // that when the client requests `listings=canada` we don't start fetching
+  // from the default collection before reading the query param.
   useEffect(() => {
+    if (listingsParam === null) return; // not initialized yet
+
     let isMounted = true;
     (async () => {
       const localUsedIds: string[] = [];
@@ -280,7 +302,7 @@ export default function PlayPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [listingsParam]);
 
   const calculateScore = (guessMoney: number, valueOfHome: number) => {
     const percentageError = (guessMoney - valueOfHome) / valueOfHome;
@@ -452,7 +474,13 @@ export default function PlayPage() {
       : elapsedMs;
     const updated = [
       ...existing,
-      { score: total, ts: Date.now(), durationMs: finalDuration, clientId },
+      {
+        score: total,
+        ts: Date.now(),
+        durationMs: finalDuration,
+        clientId,
+        isCanada,
+      },
     ];
 
     if (typeof window !== "undefined") {
@@ -478,6 +506,7 @@ export default function PlayPage() {
             ts: Date.now(),
             durationMs: finalDuration,
             clientId,
+            isCanada,
           }),
         });
       } catch (err) {
@@ -486,7 +515,12 @@ export default function PlayPage() {
       }
     })();
 
-    router.push("/leaderboards?fromPlay=true");
+    // preserve listings context so Leaderboard's "Try Again" can return to the
+    // same listing pool (e.g. Canada)
+    const lbUrl = isCanada
+      ? "/leaderboards?fromPlay=true&listings=canada"
+      : "/leaderboards?fromPlay=true";
+    router.push(lbUrl);
   };
 
   const buttonState = () => {
@@ -671,6 +705,7 @@ export default function PlayPage() {
             disabled={roundLocked}
             color={color as SliderProps["color"]}
             onSubmit={() => currentData && handleSubmit(currentData.value)}
+            isCanada={isCanada}
           />
 
           <div className="round-div">

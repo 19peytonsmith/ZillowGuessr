@@ -14,9 +14,16 @@ export const revalidate = 0;
 export async function GET(request: Request) {
   try {
     const db = await getDb();
-    const coll = db.collection("listings");
-
     const url = new URL(request.url);
+
+    // Allow the client to request a specific logical listing pool via the
+    // `listings` query param. We map `listings=canada` to the
+    // `listings-canada` collection; any other value (or absence) uses
+    // the default `listings` collection.
+    const listingsParam = url.searchParams.get("listings") ?? "";
+    const collectionName =
+      listingsParam === "canada" ? "listings-canada" : "listings";
+    const coll = db.collection(collectionName);
 
     // Parse count (number of unique listings requested). Default 1.
     const rawCount = url.searchParams.get("count") ?? "1";

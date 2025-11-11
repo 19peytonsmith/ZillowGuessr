@@ -110,12 +110,53 @@ export default function SplashPage() {
             </span>
           </Link>
 
-          <Link
-            href="/leaderboards"
-            className="backdrop-blur-xs btn btn-lg btn-outline-secondary ghost-btn-accessible"
-          >
-            Leaderboards
-          </Link>
+          <div className="flex items-center justify-center gap-2">
+            <Link
+              href="/play?listings=canada"
+              className="backdrop-blur-xs play-btn-canada"
+              aria-label="Play Canada Edition"
+              title="Play Canada Edition"
+            >
+              <img
+                src="/assets/maple-leaf.svg"
+                alt="Maple leaf"
+                className="me-2 maple-leaf-icon"
+                aria-hidden
+              />
+              {/* Split the label into spans so we can animate each letter */}
+              <span className="canada-text" aria-hidden>
+                {"Play Canada".split("").map((ch, i) => {
+                  // mark spaces so they don't animate but preserve spacing
+                  if (ch === " ")
+                    return (
+                      <span key={i} className="canada-letter space">
+                        {ch}
+                      </span>
+                    );
+                  return (
+                    <span
+                      key={i}
+                      className={`canada-letter`}
+                      style={{
+                        // expose the index to CSS for staggered delays
+                        ["--i" as any]: i,
+                      }}
+                      data-index={i}
+                    >
+                      {ch}
+                    </span>
+                  );
+                })}
+              </span>
+            </Link>
+
+            <Link
+              href="/leaderboards"
+              className="backdrop-blur-xs btn btn-lg btn-outline-secondary ghost-btn-accessible"
+            >
+              Leaderboards
+            </Link>
+          </div>
         </div>
 
         <hr className="relative z-10" />
