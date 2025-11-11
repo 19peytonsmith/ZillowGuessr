@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import ThemeToggle from "@/components/ThemeToggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -117,11 +118,13 @@ export default function SplashPage() {
               aria-label="Play Canada Edition"
               title="Play Canada Edition"
             >
-              <img
+              <Image
                 src="/assets/maple-leaf.svg"
                 alt="Maple leaf"
                 className="me-2 maple-leaf-icon"
                 aria-hidden
+                width={18}
+                height={18}
               />
               {/* Split the label into spans so we can animate each letter */}
               <span className="canada-text" aria-hidden>
@@ -133,19 +136,21 @@ export default function SplashPage() {
                         {ch}
                       </span>
                     );
-                  return (
-                    <span
-                      key={i}
-                      className={`canada-letter`}
-                      style={{
-                        // expose the index to CSS for staggered delays
-                        ["--i" as any]: i,
-                      }}
-                      data-index={i}
-                    >
-                      {ch}
-                    </span>
-                  );
+                  return (() => {
+                    const letterStyle = {
+                      ["--i"]: i,
+                    } as unknown as React.CSSProperties;
+                    return (
+                      <span
+                        key={i}
+                        className={`canada-letter`}
+                        style={letterStyle}
+                        data-index={i}
+                      >
+                        {ch}
+                      </span>
+                    );
+                  })();
                 })}
               </span>
             </Link>

@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Cookies from "js-cookie";
 import "../styles/leaderboard.css";
 import ThemeToggle from "./ThemeToggle";
@@ -548,11 +549,13 @@ export default function Leaderboard() {
       >
         <span className="score-label">
           {entry.isCanada ? (
-            <img
+            <Image
               src="/assets/maple-leaf.svg"
               alt="Canadian score"
               className="me-1 maple-leaf-icon"
               aria-hidden
+              width={14}
+              height={14}
             />
           ) : null}
           <span className="label-text">
@@ -706,11 +709,13 @@ export default function Leaderboard() {
                             <span className="global-username flex items-center">
                               {/* If this score is Canadian, show the maple leaf SVG */}
                               {entry.isCanada ? (
-                                <img
+                                <Image
                                   src="/assets/maple-leaf.svg"
                                   alt="Canadian score"
                                   className="me-1 maple-leaf-icon"
                                   aria-hidden
+                                  width={14}
+                                  height={14}
                                 />
                               ) : null}
                               <span className="label-text">

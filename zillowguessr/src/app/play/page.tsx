@@ -224,62 +224,6 @@ export default function PlayPage() {
     }
   };
 
-  const fetchPropertyInfo = async (
-    index: number,
-    maxAttempts = 20,
-    delayMs = 300,
-    excludes: string[] = []
-  ): Promise<PropertyInfo | null> => {
-    const isValid = (data: unknown): data is PropertyInfo => {
-      const d = data as Partial<PropertyInfo> | null | undefined;
-      return (
-        !!d &&
-        typeof d.value === "number" &&
-        Array.isArray(d.urls) &&
-        d.urls.length > 2 &&
-        typeof d.address === "string"
-      );
-    };
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        const params = new URLSearchParams();
-        params.set("page", String(index));
-        params.set("attempt", String(attempt));
-        if (listingsParam) params.set("listings", listingsParam);
-        if (excludes.length > 0) {
-          // send as comma-separated string; backend expects `toExclude` for resampling
-          params.set("toExclude", excludes.join(","));
-        }
-
-        const res = await fetch(`/api/property_info?${params.toString()}`, {
-          cache: "no-store",
-        });
-
-        if (!res.ok) {
-          console.warn(
-            `property_info fetch not ok (status=${res.status}), attempt=${attempt}`
-          );
-        } else {
-          const body = await res.json();
-          if (isValid(body)) {
-            return body;
-          }
-          console.warn("property_info returned invalid data, retrying", body);
-        }
-      } catch (err) {
-        console.warn("Error fetching property_info, retrying", err);
-      }
-
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-
-    console.error(
-      `Failed to fetch a valid property after ${maxAttempts} attempts (seed=${index}).`
-    );
-    return null;
-  };
-
   // Load property data once listingsParam has been initialized. This ensures
   // that when the client requests `listings=canada` we don't start fetching
   // from the default collection before reading the query param.
@@ -287,6 +231,63 @@ export default function PlayPage() {
     if (listingsParam === null) return; // not initialized yet
 
     let isMounted = true;
+
+    const fetchPropertyInfo = async (
+      index: number,
+      maxAttempts = 20,
+      delayMs = 300,
+      excludes: string[] = []
+    ): Promise<PropertyInfo | null> => {
+      const isValid = (data: unknown): data is PropertyInfo => {
+        const d = data as Partial<PropertyInfo> | null | undefined;
+        return (
+          !!d &&
+          typeof d.value === "number" &&
+          Array.isArray(d.urls) &&
+          d.urls.length > 2 &&
+          typeof d.address === "string"
+        );
+      };
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const params = new URLSearchParams();
+          params.set("page", String(index));
+          params.set("attempt", String(attempt));
+          if (listingsParam) params.set("listings", listingsParam);
+          if (excludes.length > 0) {
+            // send as comma-separated string; backend expects `toExclude` for resampling
+            params.set("toExclude", excludes.join(","));
+          }
+
+          const res = await fetch(`/api/property_info?${params.toString()}`, {
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            console.warn(
+              `property_info fetch not ok (status=${res.status}), attempt=${attempt}`
+            );
+          } else {
+            const body = await res.json();
+            if (isValid(body)) {
+              return body;
+            }
+            console.warn("property_info returned invalid data, retrying", body);
+          }
+        } catch (err) {
+          console.warn("Error fetching property_info, retrying", err);
+        }
+
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+
+      console.error(
+        `Failed to fetch a valid property after ${maxAttempts} attempts (seed=${index}).`
+      );
+      return null;
+    };
+
     (async () => {
       const localUsedIds: string[] = [];
       for (let i = 0; i < ROUNDS; i++) {
@@ -299,6 +300,7 @@ export default function PlayPage() {
         }
       }
     })();
+
     return () => {
       isMounted = false;
     };
